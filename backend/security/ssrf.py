@@ -97,7 +97,11 @@ class SafeFetcher:
                 if (headers or params) and original_scheme == "https" and parts.scheme != "https":
                     raise UnsafeURL("Credentials cannot follow an HTTPS downgrade")
                 addresses = await public_addresses(url, self.resolver)
-                request_headers = {"Accept-Encoding": "identity", **(headers or {})}
+                request_headers = {
+                    "Accept-Encoding": "identity",
+                    "User-Agent": "APIIngestBuilder/0.2",
+                    **(headers or {}),
+                }
                 async with httpx.AsyncClient(
                     transport=self.transport_factory(addresses[0]),
                     follow_redirects=False,

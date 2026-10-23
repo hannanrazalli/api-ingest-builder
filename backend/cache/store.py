@@ -27,6 +27,10 @@ class Store:
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 job_id TEXT NOT NULL REFERENCES jobs(id), value TEXT NOT NULL)""")
             db.execute("CREATE INDEX IF NOT EXISTS events_job ON events(job_id, id)")
+            db.execute(
+                "CREATE TABLE IF NOT EXISTS research_index (key TEXT PRIMARY KEY, value TEXT)"
+            )
+            db.execute("CREATE TABLE IF NOT EXISTS results (job_id TEXT PRIMARY KEY, value TEXT)")
         try:
             self.path.chmod(0o600)
         except OSError:
@@ -89,3 +93,24 @@ class Store:
                 "SELECT id,value FROM events WHERE job_id=? AND id>? ORDER BY id", (job_id, after)
             ).fetchall()
         return [(i, Event.model_validate_json(value)) for i, value in rows]
+
+    def index(self, key, value=None):
+        with self.connect() as db:
+            if value is not None:
+                db.execute("INSERT OR REPLACE INTO research_index VALUES (?, ?)", (key, value))
+            row = db.execute("SELECT value FROM research_index WHERE key=?", (key,)).fetchone()
+        return row[0] if row else None
+
+    def save_result(self, job_id, value):
+        with self.connect() as db:
+            db.execute("INSERT OR REPLACE INTO results VALUES (?, ?)", (job_id, json.dumps(value)))
+
+    def result(self, job_id):
+        with self.connect() as db:
+            row = db.execute("SELECT value FROM results WHERE job_id=?", (job_id,)).fetchone()
+        return json.loads(row[0]) if row else None
+
+    def jobs(self):
+        with self.connect() as db:
+            rows = db.execute("SELECT value FROM jobs ORDER BY rowid DESC LIMIT 50").fetchall()
+        return [Job.model_validate_json(row[0]) for row in rows]

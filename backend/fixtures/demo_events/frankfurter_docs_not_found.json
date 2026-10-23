@@ -1,0 +1,152 @@
+[
+  {
+    "job_id": "frankfurter-docs_not_found",
+    "ts": 1792713600.0,
+    "agent": "orchestrator",
+    "state": "walking",
+    "task": "Research API documentation",
+    "detail": null,
+    "llm": null,
+    "cache_hit": null
+  },
+  {
+    "job_id": "frankfurter-docs_not_found",
+    "ts": 1792713600.4,
+    "agent": "orchestrator",
+    "state": "working",
+    "task": "Research API documentation",
+    "detail": null,
+    "llm": null,
+    "cache_hit": null
+  },
+  {
+    "job_id": "frankfurter-docs_not_found",
+    "ts": 1792713600.8,
+    "agent": "prober",
+    "state": "walking",
+    "task": "Discover API documentation",
+    "detail": null,
+    "llm": null,
+    "cache_hit": null
+  },
+  {
+    "job_id": "frankfurter-docs_not_found",
+    "ts": 1792713601.2,
+    "agent": "prober",
+    "state": "working",
+    "task": "Discover API documentation",
+    "detail": null,
+    "llm": null,
+    "cache_hit": null
+  },
+  {
+    "job_id": "frankfurter-docs_not_found",
+    "ts": 1792713601.6,
+    "agent": "prober",
+    "state": "working",
+    "task": "Found 0 possible documentation pages",
+    "detail": null,
+    "llm": null,
+    "cache_hit": null
+  },
+  {
+    "job_id": "frankfurter-docs_not_found",
+    "ts": 1792713602.0,
+    "agent": "prober",
+    "state": "success",
+    "task": "Discover API documentation complete",
+    "detail": null,
+    "llm": null,
+    "cache_hit": null
+  },
+  {
+    "job_id": "frankfurter-docs_not_found",
+    "ts": 1792713602.4,
+    "agent": "fetcher",
+    "state": "walking",
+    "task": "Fetch and clean documentation",
+    "detail": null,
+    "llm": null,
+    "cache_hit": null
+  },
+  {
+    "job_id": "frankfurter-docs_not_found",
+    "ts": 1792713602.8,
+    "agent": "fetcher",
+    "state": "working",
+    "task": "Fetch and clean documentation",
+    "detail": null,
+    "llm": null,
+    "cache_hit": null
+  },
+  {
+    "job_id": "frankfurter-docs_not_found",
+    "ts": 1792713603.2,
+    "agent": "fetcher",
+    "state": "working",
+    "task": "Kept 0 unique documentation pages",
+    "detail": null,
+    "llm": null,
+    "cache_hit": null
+  },
+  {
+    "job_id": "frankfurter-docs_not_found",
+    "ts": 1792713603.6,
+    "agent": "fetcher",
+    "state": "success",
+    "task": "Fetch and clean documentation complete",
+    "detail": null,
+    "llm": null,
+    "cache_hit": null
+  },
+  {
+    "job_id": "frankfurter-docs_not_found",
+    "ts": 1792713604.0,
+    "agent": "retriever",
+    "state": "walking",
+    "task": "Rank relevant documentation",
+    "detail": null,
+    "llm": null,
+    "cache_hit": null
+  },
+  {
+    "job_id": "frankfurter-docs_not_found",
+    "ts": 1792713604.4,
+    "agent": "retriever",
+    "state": "working",
+    "task": "Rank relevant documentation",
+    "detail": null,
+    "llm": null,
+    "cache_hit": null
+  },
+  {
+    "job_id": "frankfurter-docs_not_found",
+    "ts": 1792713604.8,
+    "agent": "retriever",
+    "state": "success",
+    "task": "Rank relevant documentation complete",
+    "detail": null,
+    "llm": null,
+    "cache_hit": null
+  },
+  {
+    "job_id": "frankfurter-docs_not_found",
+    "ts": 1792713605.2,
+    "agent": "orchestrator",
+    "state": "working",
+    "task": "Research finished without guessing API facts",
+    "detail": null,
+    "llm": null,
+    "cache_hit": null
+  },
+  {
+    "job_id": "frankfurter-docs_not_found",
+    "ts": 1792713605.6,
+    "agent": "orchestrator",
+    "state": "success",
+    "task": "Research API documentation complete",
+    "detail": null,
+    "llm": null,
+    "cache_hit": null
+  }
+]

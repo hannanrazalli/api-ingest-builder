@@ -1,0 +1,142 @@
+[
+  {
+    "job_id": "coingecko-cache_hit",
+    "ts": 1792713600.0,
+    "agent": "orchestrator",
+    "state": "walking",
+    "task": "Research API documentation",
+    "detail": null,
+    "llm": null,
+    "cache_hit": null
+  },
+  {
+    "job_id": "coingecko-cache_hit",
+    "ts": 1792713600.4,
+    "agent": "orchestrator",
+    "state": "working",
+    "task": "Research API documentation",
+    "detail": null,
+    "llm": null,
+    "cache_hit": null
+  },
+  {
+    "job_id": "coingecko-cache_hit",
+    "ts": 1792713600.8,
+    "agent": "orchestrator",
+    "state": "working",
+    "task": "Loaded archived specification; zero LLM calls",
+    "detail": null,
+    "llm": null,
+    "cache_hit": null
+  },
+  {
+    "job_id": "coingecko-cache_hit",
+    "ts": 1792713601.2,
+    "agent": "prober",
+    "state": "success",
+    "task": "Returned with an archived specification",
+    "detail": null,
+    "llm": null,
+    "cache_hit": true
+  },
+  {
+    "job_id": "coingecko-cache_hit",
+    "ts": 1792713601.6,
+    "agent": "verifier",
+    "state": "walking",
+    "task": "Verify one safe GET operation",
+    "detail": null,
+    "llm": null,
+    "cache_hit": null
+  },
+  {
+    "job_id": "coingecko-cache_hit",
+    "ts": 1792713602.0,
+    "agent": "verifier",
+    "state": "working",
+    "task": "Verify one safe GET operation",
+    "detail": null,
+    "llm": null,
+    "cache_hit": null
+  },
+  {
+    "job_id": "coingecko-cache_hit",
+    "ts": 1792713602.4,
+    "agent": "verifier",
+    "state": "working",
+    "task": "GET returned valid JSON; parameter acceptance is observational, not guaranteed",
+    "detail": null,
+    "llm": null,
+    "cache_hit": null
+  },
+  {
+    "job_id": "coingecko-cache_hit",
+    "ts": 1792713602.8,
+    "agent": "verifier",
+    "state": "success",
+    "task": "Verify one safe GET operation complete",
+    "detail": null,
+    "llm": null,
+    "cache_hit": null
+  },
+  {
+    "job_id": "coingecko-cache_hit",
+    "ts": 1792713603.2,
+    "agent": "profiler",
+    "state": "walking",
+    "task": "Profile the response structure",
+    "detail": null,
+    "llm": null,
+    "cache_hit": null
+  },
+  {
+    "job_id": "coingecko-cache_hit",
+    "ts": 1792713603.6,
+    "agent": "profiler",
+    "state": "working",
+    "task": "Profile the response structure",
+    "detail": null,
+    "llm": null,
+    "cache_hit": null
+  },
+  {
+    "job_id": "coingecko-cache_hit",
+    "ts": 1792713604.0,
+    "agent": "profiler",
+    "state": "working",
+    "task": "Depth 3; 0 record arrays",
+    "detail": null,
+    "llm": null,
+    "cache_hit": null
+  },
+  {
+    "job_id": "coingecko-cache_hit",
+    "ts": 1792713604.4,
+    "agent": "profiler",
+    "state": "success",
+    "task": "Profile the response structure complete",
+    "detail": null,
+    "llm": null,
+    "cache_hit": null
+  },
+  {
+    "job_id": "coingecko-cache_hit",
+    "ts": 1792713604.8,
+    "agent": "orchestrator",
+    "state": "working",
+    "task": "Research finished with source-backed results",
+    "detail": null,
+    "llm": null,
+    "cache_hit": null
+  },
+  {
+    "job_id": "coingecko-cache_hit",
+    "ts": 1792713605.2,
+    "agent": "orchestrator",
+    "state": "success",
+    "task": "Research API documentation complete",
+    "detail": null,
+    "llm": null,
+    "cache_hit": null
+  }
+]

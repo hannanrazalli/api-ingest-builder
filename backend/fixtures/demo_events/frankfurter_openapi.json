@@ -1,0 +1,222 @@
+[
+  {
+    "job_id": "frankfurter-openapi",
+    "ts": 1792713600.0,
+    "agent": "orchestrator",
+    "state": "walking",
+    "task": "Research API documentation",
+    "detail": null,
+    "llm": null,
+    "cache_hit": null
+  },
+  {
+    "job_id": "frankfurter-openapi",
+    "ts": 1792713600.4,
+    "agent": "orchestrator",
+    "state": "working",
+    "task": "Research API documentation",
+    "detail": null,
+    "llm": null,
+    "cache_hit": null
+  },
+  {
+    "job_id": "frankfurter-openapi",
+    "ts": 1792713600.8,
+    "agent": "prober",
+    "state": "walking",
+    "task": "Discover API documentation",
+    "detail": null,
+    "llm": null,
+    "cache_hit": null
+  },
+  {
+    "job_id": "frankfurter-openapi",
+    "ts": 1792713601.2,
+    "agent": "prober",
+    "state": "working",
+    "task": "Discover API documentation",
+    "detail": null,
+    "llm": null,
+    "cache_hit": null
+  },
+  {
+    "job_id": "frankfurter-openapi",
+    "ts": 1792713601.6,
+    "agent": "prober",
+    "state": "working",
+    "task": "Parsed 1 documented operations without an LLM",
+    "detail": null,
+    "llm": null,
+    "cache_hit": null
+  },
+  {
+    "job_id": "frankfurter-openapi",
+    "ts": 1792713602.0,
+    "agent": "prober",
+    "state": "success",
+    "task": "Discover API documentation complete",
+    "detail": null,
+    "llm": null,
+    "cache_hit": null
+  },
+  {
+    "job_id": "frankfurter-openapi",
+    "ts": 1792713602.4,
+    "agent": "fetcher",
+    "state": "walking",
+    "task": "Fetch and clean documentation",
+    "detail": null,
+    "llm": null,
+    "cache_hit": null
+  },
+  {
+    "job_id": "frankfurter-openapi",
+    "ts": 1792713602.8,
+    "agent": "fetcher",
+    "state": "working",
+    "task": "Fetch and clean documentation",
+    "detail": null,
+    "llm": null,
+    "cache_hit": null
+  },
+  {
+    "job_id": "frankfurter-openapi",
+    "ts": 1792713603.2,
+    "agent": "fetcher",
+    "state": "working",
+    "task": "Kept 1 unique documentation pages",
+    "detail": null,
+    "llm": null,
+    "cache_hit": null
+  },
+  {
+    "job_id": "frankfurter-openapi",
+    "ts": 1792713603.6,
+    "agent": "fetcher",
+    "state": "success",
+    "task": "Fetch and clean documentation complete",
+    "detail": null,
+    "llm": null,
+    "cache_hit": null
+  },
+  {
+    "job_id": "frankfurter-openapi",
+    "ts": 1792713604.0,
+    "agent": "retriever",
+    "state": "sleeping",
+    "task": "OpenAPI parsed directly; retrieval not needed",
+    "detail": null,
+    "llm": null,
+    "cache_hit": null
+  },
+  {
+    "job_id": "frankfurter-openapi",
+    "ts": 1792713604.4,
+    "agent": "extractor",
+    "state": "sleeping",
+    "task": "OpenAPI covers these operations; zero LLM calls",
+    "detail": null,
+    "llm": null,
+    "cache_hit": null
+  },
+  {
+    "job_id": "frankfurter-openapi",
+    "ts": 1792713604.8,
+    "agent": "verifier",
+    "state": "walking",
+    "task": "Verify one safe GET operation",
+    "detail": null,
+    "llm": null,
+    "cache_hit": null
+  },
+  {
+    "job_id": "frankfurter-openapi",
+    "ts": 1792713605.2,
+    "agent": "verifier",
+    "state": "working",
+    "task": "Verify one safe GET operation",
+    "detail": null,
+    "llm": null,
+    "cache_hit": null
+  },
+  {
+    "job_id": "frankfurter-openapi",
+    "ts": 1792713605.6,
+    "agent": "verifier",
+    "state": "working",
+    "task": "GET returned valid JSON; parameter acceptance is observational, not guaranteed",
+    "detail": null,
+    "llm": null,
+    "cache_hit": null
+  },
+  {
+    "job_id": "frankfurter-openapi",
+    "ts": 1792713606.0,
+    "agent": "verifier",
+    "state": "success",
+    "task": "Verify one safe GET operation complete",
+    "detail": null,
+    "llm": null,
+    "cache_hit": null
+  },
+  {
+    "job_id": "frankfurter-openapi",
+    "ts": 1792713606.4,
+    "agent": "profiler",
+    "state": "walking",
+    "task": "Profile the response structure",
+    "detail": null,
+    "llm": null,
+    "cache_hit": null
+  },
+  {
+    "job_id": "frankfurter-openapi",
+    "ts": 1792713606.8,
+    "agent": "profiler",
+    "state": "working",
+    "task": "Profile the response structure",
+    "detail": null,
+    "llm": null,
+    "cache_hit": null
+  },
+  {
+    "job_id": "frankfurter-openapi",
+    "ts": 1792713607.2,
+    "agent": "profiler",
+    "state": "working",
+    "task": "Depth 2; 1 record arrays",
+    "detail": null,
+    "llm": null,
+    "cache_hit": null
+  },
+  {
+    "job_id": "frankfurter-openapi",
+    "ts": 1792713607.6,
+    "agent": "profiler",
+    "state": "success",
+    "task": "Profile the response structure complete",
+    "detail": null,
+    "llm": null,
+    "cache_hit": null
+  },
+  {
+    "job_id": "frankfurter-openapi",
+    "ts": 1792713608.0,
+    "agent": "orchestrator",
+    "state": "working",
+    "task": "Research finished with source-backed results",
+    "detail": null,
+    "llm": null,
+    "cache_hit": null
+  },
+  {
+    "job_id": "frankfurter-openapi",
+    "ts": 1792713608.4,
+    "agent": "orchestrator",
+    "state": "success",
+    "task": "Research API documentation complete",
+    "detail": null,
+    "llm": null,
+    "cache_hit": null
+  }
+]

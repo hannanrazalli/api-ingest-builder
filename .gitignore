@@ -15,3 +15,5 @@ dist/
 playwright-report/
 
 *.tsbuildinfo
+
+auth.json

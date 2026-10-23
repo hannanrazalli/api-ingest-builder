@@ -18,10 +18,19 @@ SYSTEM = (
 )
 
 
-def strict_schema(value):
+def strict_schema(value, schema_node=True):
     if isinstance(value, dict):
-        value = {k: strict_schema(v) for k, v in value.items() if k != "default"}
-        if value.get("type") == "object" and "properties" in value:
+        value = {
+            key: strict_schema(
+                item,
+                key not in {"properties", "$defs", "patternProperties"} if schema_node else True,
+            )
+            for key, item in value.items()
+            if not (schema_node and key == "default")
+        }
+        if schema_node and value.get("format") == "uri":
+            value.pop("format")  # URL validity is still enforced by Pydantic after decoding.
+        if schema_node and value.get("type") == "object" and "properties" in value:
             value["additionalProperties"] = False
             value["required"] = list(value["properties"])
     elif isinstance(value, list):

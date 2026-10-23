@@ -1,0 +1,58 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "frankfurter",
+    "version": "2"
+  },
+  "servers": [
+    {
+      "url": "https://api.frankfurter.dev/v2"
+    }
+  ],
+  "paths": {
+    "/rates": {
+      "get": {
+        "summary": "Exchange rates",
+        "parameters": [
+          {
+            "name": "base",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "quotes",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "from",
+            "in": "query",
+            "description": "Starting date",
+            "schema": {
+              "type": "string",
+              "format": "date"
+            }
+          },
+          {
+            "name": "to",
+            "in": "query",
+            "description": "Ending date",
+            "schema": {
+              "type": "string",
+              "format": "date"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "An array of date, base, quote, rate records"
+          }
+        }
+      }
+    }
+  }
+}

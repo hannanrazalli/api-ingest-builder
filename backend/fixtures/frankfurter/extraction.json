@@ -1,0 +1,46 @@
+{
+  "name": "frankfurter",
+  "base_url": "https://api.frankfurter.dev/v2",
+  "auth": {
+    "required": false,
+    "type": "none"
+  },
+  "endpoints": [
+    {
+      "path": "/rates",
+      "method": "GET",
+      "source_url": "https://frankfurter.dev/",
+      "params": [
+        {
+          "name": "base",
+          "location": "query",
+          "default": "EUR",
+          "description": "Example base currency"
+        },
+        {
+          "name": "quotes",
+          "location": "query",
+          "default": "USD",
+          "description": "Example quote currencies"
+        },
+        {
+          "name": "from",
+          "location": "query",
+          "description": "Starting ISO date"
+        },
+        {
+          "name": "to",
+          "location": "query",
+          "description": "Ending ISO date"
+        }
+      ],
+      "description": "Exchange rates",
+      "date_params": {
+        "start": "from",
+        "end": "to",
+        "format": "iso"
+      }
+    }
+  ],
+  "headers": []
+}

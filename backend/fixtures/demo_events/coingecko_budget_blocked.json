@@ -1,0 +1,212 @@
+[
+  {
+    "job_id": "coingecko-budget_blocked",
+    "ts": 1792713600.0,
+    "agent": "orchestrator",
+    "state": "walking",
+    "task": "Research API documentation",
+    "detail": null,
+    "llm": null,
+    "cache_hit": null
+  },
+  {
+    "job_id": "coingecko-budget_blocked",
+    "ts": 1792713600.4,
+    "agent": "orchestrator",
+    "state": "working",
+    "task": "Research API documentation",
+    "detail": null,
+    "llm": null,
+    "cache_hit": null
+  },
+  {
+    "job_id": "coingecko-budget_blocked",
+    "ts": 1792713600.8,
+    "agent": "prober",
+    "state": "walking",
+    "task": "Discover API documentation",
+    "detail": null,
+    "llm": null,
+    "cache_hit": null
+  },
+  {
+    "job_id": "coingecko-budget_blocked",
+    "ts": 1792713601.2,
+    "agent": "prober",
+    "state": "working",
+    "task": "Discover API documentation",
+    "detail": null,
+    "llm": null,
+    "cache_hit": null
+  },
+  {
+    "job_id": "coingecko-budget_blocked",
+    "ts": 1792713601.6,
+    "agent": "prober",
+    "state": "working",
+    "task": "Found 2 possible documentation pages",
+    "detail": null,
+    "llm": null,
+    "cache_hit": null
+  },
+  {
+    "job_id": "coingecko-budget_blocked",
+    "ts": 1792713602.0,
+    "agent": "prober",
+    "state": "success",
+    "task": "Discover API documentation complete",
+    "detail": null,
+    "llm": null,
+    "cache_hit": null
+  },
+  {
+    "job_id": "coingecko-budget_blocked",
+    "ts": 1792713602.4,
+    "agent": "fetcher",
+    "state": "walking",
+    "task": "Fetch and clean documentation",
+    "detail": null,
+    "llm": null,
+    "cache_hit": null
+  },
+  {
+    "job_id": "coingecko-budget_blocked",
+    "ts": 1792713602.8,
+    "agent": "fetcher",
+    "state": "working",
+    "task": "Fetch and clean documentation",
+    "detail": null,
+    "llm": null,
+    "cache_hit": null
+  },
+  {
+    "job_id": "coingecko-budget_blocked",
+    "ts": 1792713603.2,
+    "agent": "fetcher",
+    "state": "working",
+    "task": "Kept 2 unique documentation pages",
+    "detail": null,
+    "llm": null,
+    "cache_hit": null
+  },
+  {
+    "job_id": "coingecko-budget_blocked",
+    "ts": 1792713603.6,
+    "agent": "fetcher",
+    "state": "success",
+    "task": "Fetch and clean documentation complete",
+    "detail": null,
+    "llm": null,
+    "cache_hit": null
+  },
+  {
+    "job_id": "coingecko-budget_blocked",
+    "ts": 1792713604.0,
+    "agent": "retriever",
+    "state": "walking",
+    "task": "Rank relevant documentation",
+    "detail": null,
+    "llm": null,
+    "cache_hit": null
+  },
+  {
+    "job_id": "coingecko-budget_blocked",
+    "ts": 1792713604.4,
+    "agent": "retriever",
+    "state": "working",
+    "task": "Rank relevant documentation",
+    "detail": null,
+    "llm": null,
+    "cache_hit": null
+  },
+  {
+    "job_id": "coingecko-budget_blocked",
+    "ts": 1792713604.8,
+    "agent": "retriever",
+    "state": "working",
+    "task": "Selected 2 bounded chunks from 2",
+    "detail": null,
+    "llm": null,
+    "cache_hit": null
+  },
+  {
+    "job_id": "coingecko-budget_blocked",
+    "ts": 1792713605.2,
+    "agent": "retriever",
+    "state": "success",
+    "task": "Rank relevant documentation complete",
+    "detail": null,
+    "llm": null,
+    "cache_hit": null
+  },
+  {
+    "job_id": "coingecko-budget_blocked",
+    "ts": 1792713605.6,
+    "agent": "extractor",
+    "state": "walking",
+    "task": "Extract a source-backed API specification",
+    "detail": null,
+    "llm": null,
+    "cache_hit": null
+  },
+  {
+    "job_id": "coingecko-budget_blocked",
+    "ts": 1792713606.0,
+    "agent": "extractor",
+    "state": "working",
+    "task": "Extract a source-backed API specification",
+    "detail": null,
+    "llm": null,
+    "cache_hit": null
+  },
+  {
+    "job_id": "coingecko-budget_blocked",
+    "ts": 1792713606.4,
+    "agent": "extractor",
+    "state": "working",
+    "task": "Use 2 retrieved chunks only",
+    "detail": null,
+    "llm": null,
+    "cache_hit": null
+  },
+  {
+    "job_id": "coingecko-budget_blocked",
+    "ts": 1792713606.8,
+    "agent": "extractor",
+    "state": "working",
+    "task": "Checking structured response cache",
+    "detail": null,
+    "llm": null,
+    "cache_hit": null
+  },
+  {
+    "job_id": "coingecko-budget_blocked",
+    "ts": 1792713607.2,
+    "agent": "extractor",
+    "state": "waiting",
+    "task": "Cost Guard blocked call; approve an override to proceed",
+    "detail": null,
+    "llm": null,
+    "cache_hit": null
+  },
+  {
+    "job_id": "coingecko-budget_blocked",
+    "ts": 1792713607.6,
+    "agent": "extractor",
+    "state": "waiting",
+    "task": "Cost Guard requires explicit budget approval",
+    "detail": null,
+    "llm": null,
+    "cache_hit": null
+  },
+  {
+    "job_id": "coingecko-budget_blocked",
+    "ts": 1792713608.0,
+    "agent": "orchestrator",
+    "state": "waiting",
+    "task": "Cost Guard requires explicit budget approval",
+    "detail": null,
+    "llm": null,
+    "cache_hit": null
+  }
+]

@@ -2,7 +2,7 @@
 
 Portable data engineering tools with deterministic processing, SQLite caching, and budgeted LLM use.
 
-**Phase 1 and Phase 1b are implemented.** This release provides onboarding, provider/settings APIs, typed spec/job/event contracts, caches, Cost Guard, protected fetch infrastructure and persistent SSE. Research, recorded API demos, generation, conversion, explanations and the Office visualization arrive in Phases 2–6. The foundation makes no LLM calls on startup or when changing settings.
+**Phases 1, 1b and 2 are implemented.** This release provides onboarding, provider/settings APIs, typed spec/job/event contracts, caches, Cost Guard, protected fetch infrastructure and persistent SSE. Research, recorded API demos, generation, conversion, explanations and the Office visualization arrive in Phases 2–6. The foundation makes no LLM calls on startup or when changing settings.
 
 ## Quickstart (PowerShell or a POSIX shell)
 
@@ -110,3 +110,14 @@ Run `python scripts/smoke_docker.py` after the Docker build for a disposable pro
 7. Polish, accessibility and clean-machine verification.
 
 Development stops after each phase pending `continue`. No Office code or third-party sprites have been copied.
+
+
+## Research pipeline (Phase 2)
+
+`POST /api/research` accepts `{url, force, demo}` and starts a durable job; `/api/research/{id}` returns results, `/api/jobs` lists history and the existing SSE route streams events. Demo handles CoinGecko and Frankfurter entirely offline. Examples and provenance live in `backend/fixtures/README.md`; demo endpoints remain explicitly unverified against a live service. Prober handles OpenAPI/Swagger JSON/YAML with bounded local references, discovery links, robots and sitemap. HTML docs use BM25 top-k extraction only; unknown facts are omitted. Optional JS rendering runs offline, fulfills script/style assets through the SSRF/robots client, and blocks other browser networking. It supports offline hydration; pages requiring live XHR/WebSockets need a static/OpenAPI URL instead. API keys are host-bound and never reused from the LLM configuration.
+
+Run `.\scripts\try-url.ps1 https://frankfurter.dev -Demo` for an offline run. For your first real run, omit `-Demo` after configuring a provider through app settings or host environment. The script uses the settings layer and never opens `.env`; it prints calls, tokens/cost or the Codex quota label. For an authenticated target API, the Python CLI supports explicit `--api-key-env` and `--api-key-host`; it refuses LLM credential variable names. `--force` bypasses the spec index and re-fetches documents; unchanged extracted content can still reuse structured response caches.
+
+Scenario expectations (mock tests): OpenAPI 0 LLM calls; repeat 0; ordinary docs 1; two repairs at most 3; budget block 0. One verification GET per attempt, at most two repairs; missing credentials/parameters keep endpoints unverified without triggering Repair. A successful GET proves JSON transport/observational parameter acceptance, not the API's complete semantics. The code and recorded examples have not been exercised against real APIs or real LLMs during development.
+
+Full local gate: `.\scripts\gate.ps1` (full tests/lint, isolated no-key Compose, health/UI, secret scan, cleanup). It deliberately uses `.env.example` and a fresh data volume.

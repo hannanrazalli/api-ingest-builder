@@ -194,8 +194,13 @@ def test_requested_private_urls_never_reach_transport(url):
     def forbidden_transport(address):
         pytest.fail("Blocked URL reached the HTTP transport")
 
+    async def private_resolver(host, port):
+        return ["127.0.0.1"] if host == "localhost" else [host]
+
     with pytest.raises(UnsafeURL):
-        asyncio.run(SafeFetcher(transport_factory=forbidden_transport).get(url))
+        asyncio.run(
+            SafeFetcher(resolver=private_resolver, transport_factory=forbidden_transport).get(url)
+        )
 
 
 def test_public_redirect_to_literal_private_ip_never_fetched():

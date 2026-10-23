@@ -1,0 +1,59 @@
+{
+  "name": "coingecko",
+  "base_url": "https://api.coingecko.com/api/v3",
+  "docs_urls": [
+    "https://docs.coingecko.com/demo/reference/coins-id-market-chart-range"
+  ],
+  "retrieved_at": "2026-10-23T00:00:00Z",
+  "content_hash": "fixture",
+  "auth": {
+    "required": true,
+    "type": "header",
+    "header_name": "x-cg-demo-api-key",
+    "env_var": "COINGECKO_API_KEY",
+    "signup_url": "https://www.coingecko.com/en/api"
+  },
+  "endpoints": [
+    {
+      "path": "/coins/{id}/market_chart/range",
+      "method": "GET",
+      "source_url": "https://docs.coingecko.com/demo/reference/coins-id-market-chart-range",
+      "params": [
+        {
+          "name": "id",
+          "location": "path",
+          "required": true,
+          "default": "bitcoin",
+          "description": "Documented example coin ID"
+        },
+        {
+          "name": "vs_currency",
+          "location": "query",
+          "required": true,
+          "default": "usd",
+          "description": "Example quote currency"
+        },
+        {
+          "name": "from",
+          "location": "query",
+          "required": true,
+          "type": "integer",
+          "description": "Starting UNIX timestamp"
+        },
+        {
+          "name": "to",
+          "location": "query",
+          "required": true,
+          "type": "integer",
+          "description": "Ending UNIX timestamp"
+        }
+      ],
+      "description": "Historical market data",
+      "date_params": {
+        "start": "from",
+        "end": "to",
+        "format": "unix"
+      }
+    }
+  ]
+}

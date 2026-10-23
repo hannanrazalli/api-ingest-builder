@@ -1,3 +1,4 @@
+import asyncio
 import os
 from pathlib import Path
 from uuid import uuid4
@@ -10,7 +11,9 @@ from pydantic import ValidationError
 from backend.cache.store import Store
 from backend.llm.codex_cli import CodexCLI
 from backend.models import Event, Job, Settings, SettingsUpdate
+from backend.models.research import ResearchRequest
 from backend.orchestrator.events import EventBus
+from backend.orchestrator.research import ResearchPipeline
 from backend.settings import effective_settings, public_settings
 
 
@@ -18,6 +21,8 @@ def create_app(db_path=None, static_dir=None):
     app = FastAPI(title="API Ingest Builder", version="0.1.0")
     store = Store(db_path or os.getenv("DATABASE_PATH", "data/app.sqlite3"))
     app.state.store = store
+    app.state.tasks = set()
+    app.state.research_factory = lambda: ResearchPipeline(store)
 
     @app.middleware("http")
     async def local_api_boundary(request: Request, call_next):
@@ -92,6 +97,31 @@ def create_app(db_path=None, static_dir=None):
             )
         )
         return job
+
+    @app.get("/api/jobs")
+    def job_history():
+        return [
+            {"job": job.model_dump(mode="json"), "result": store.result(job.id)}
+            for job in store.jobs()
+        ]
+
+    @app.post("/api/research", status_code=202)
+    async def research(request: ResearchRequest):
+        job = Job(id=str(uuid4()))
+        store.save_job(job)
+        task = asyncio.create_task(app.state.research_factory().run(request, job))
+        app.state.tasks.add(task)
+        task.add_done_callback(app.state.tasks.discard)
+        return job
+
+    @app.get("/api/research/{job_id}")
+    def research_result(job_id: str):
+        if not store.job(job_id):
+            raise HTTPException(404, "Job not found")
+        return store.result(job_id) or {
+            "job": store.job(job_id).model_dump(mode="json"),
+            "status": "running",
+        }
 
     @app.get("/api/jobs/{job_id}")
     def get_job(job_id: str):
