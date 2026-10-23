@@ -168,7 +168,7 @@ Define once as a Pydantic model and a matching TypeScript type. All subagents em
 
 ## 8. Code generation modes (Jinja2, toggles in UI)
 
-Style reference: the attached `forex.py` (logging, `ds: str | None` Airflow-friendly entrypoint, python-dotenv, S3Hook, partitioned keys, `replace=True`).
+Style reference: `reference/forex.py` (logging, `ds: str | None` Airflow-friendly entrypoint, python-dotenv, S3Hook, partitioned keys, `replace=True`).
 
 - **snippet**: `url`, `headers`/`params` from `os.getenv`, `requests.get`, `raise_for_status()`, `response.json()`.
 - **daily**: function accepting `ds`, default today UTC, date formatted per `date_params.format`.
@@ -256,3 +256,8 @@ Modern, minimal, dark by default (light theme available), inspired by Linear / V
 - `make test` and `make lint` pass.
 
 Start with **Phase 1 only**, then stop.
+
+## Windows development and secret hygiene
+
+Every Makefile target must also have an equivalent PowerShell script in scripts/: dev.ps1, test.ps1, lint.ps1, build.ps1. Document both command paths in README. Docker commands must work in PowerShell.
+Never open, read, print, log, or commit .env; never ask for keys in chat.
