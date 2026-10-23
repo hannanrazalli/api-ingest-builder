@@ -1,0 +1,6 @@
+# Explicit opt-in overlay; keeps the normal image and service small.
+services:
+  app:
+    profiles: [js]
+    build:
+      target: js

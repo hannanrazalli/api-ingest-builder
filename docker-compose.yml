@@ -1,0 +1,20 @@
+services:
+  app:
+    build:
+      context: .
+      target: runtime
+    ports:
+      - "127.0.0.1:8000:8000"
+    volumes:
+      - app-data:/app/data
+    environment:
+      LLM_PROVIDER: ${LLM_PROVIDER:-}
+      LLM_API_KEY: ${LLM_API_KEY:-}
+      LLM_BASE_URL: ${LLM_BASE_URL:-}
+      MODEL_FAST: ${MODEL_FAST:-}
+      MODEL_SMART: ${MODEL_SMART:-}
+      MAX_LLM_CALLS: ${MAX_LLM_CALLS:-}
+      MAX_INPUT_TOKENS: ${MAX_INPUT_TOKENS:-}
+      MAX_OUTPUT_TOKENS: ${MAX_OUTPUT_TOKENS:-}
+volumes:
+  app-data:

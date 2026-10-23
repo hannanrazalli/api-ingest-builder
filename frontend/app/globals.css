@@ -1,0 +1,23 @@
+@import "tailwindcss";
+:root { color-scheme: dark; font-family: Inter, ui-sans-serif, system-ui, sans-serif; background: #0d0f14; color: #e8ebf3; }
+body { margin: 0; }
+main { max-width: 900px; margin: 8vh auto; padding: 24px; }
+header { border-bottom: 1px solid #272b38; margin-bottom: 36px; padding-bottom: 24px; }
+h1 { font-size: 32px; letter-spacing: -1px; margin: 12px 0; font-weight: 650; }
+h2 { font-size: 22px; margin-bottom: 16px; }
+p { color: #a4adc1; line-height: 1.7; }
+.eyebrow { font-size: 12px; color: #a9a2ff; text-transform: uppercase; letter-spacing: 2px; }
+.panel { border: 1px solid #292e3d; background: #141720; border-radius: 14px; padding: 28px; }
+form { display: grid; gap: 18px; }
+label { display: grid; gap: 8px; font-size: 14px; }
+input, select { width: 100%; padding: 11px; border: 1px solid #353b4e; border-radius: 7px; background: #0e1119; color: inherit; box-sizing: border-box; }
+button { cursor: pointer; padding: 11px 18px; border: 1px solid #655bd5; border-radius: 7px; background: #7668eb; color: white; font-weight: 600; }
+button:disabled { opacity: .5; cursor: wait; }
+.secondary { background: transparent; border-color: #353b4e; }
+.actions { display: flex; flex-wrap: wrap; gap: 12px; }
+:focus-visible { outline: 2px solid #b8afff; outline-offset: 4px; }
+.status { min-height: 24px; color: #bab2ff; }
+.grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 12px; margin-top: 24px; }
+.tile { border: 1px solid #292e3d; border-radius: 8px; padding: 16px; }
+small { color: #a4adc1; }
+@media (prefers-reduced-motion: reduce) { * { scroll-behavior: auto !important; animation: none !important; } }
