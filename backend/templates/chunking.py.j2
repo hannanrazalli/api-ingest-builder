@@ -1,0 +1,4 @@
+{% include 'common.py.j2' %}
+
+if __name__ == "__main__":
+    backfill({{ options.start_date.isoformat()|py }}, {{ options.end_date.isoformat()|py }}, chunk_days={{ chunk_days }})

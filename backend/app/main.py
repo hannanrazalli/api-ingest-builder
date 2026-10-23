@@ -8,10 +8,13 @@ from fastapi.responses import JSONResponse, StreamingResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import ValidationError
 
+from backend.agents.base import AgentContext
+from backend.agents.generator import Generator
 from backend.cache.store import Store
 from backend.llm.codex_cli import CodexCLI
-from backend.models import Event, Job, Settings, SettingsUpdate
-from backend.models.research import ResearchRequest
+from backend.models import Event, Job, Settings, SettingsUpdate, Spec
+from backend.models.generation import GenerateRequest
+from backend.models.research import Profile, ResearchRequest
 from backend.orchestrator.events import EventBus
 from backend.orchestrator.research import ResearchPipeline
 from backend.settings import effective_settings, public_settings
@@ -122,6 +125,40 @@ def create_app(db_path=None, static_dir=None):
             "job": store.job(job_id).model_dump(mode="json"),
             "status": "running",
         }
+
+    @app.post("/api/generate")
+    async def generate(request: GenerateRequest):
+        result = store.result(request.job_id)
+        if not result or not result.get("spec"):
+            raise HTTPException(404, "Research a source-backed API first")
+        spec = Spec.model_validate(result["spec"])
+        profile = Profile.model_validate(result["profile"]) if result.get("profile") else None
+        settings = effective_settings(store)
+        ctx = AgentContext(
+            store, store.job(request.job_id), EventBus(store, [settings.api_key.get_secret_value()])
+        )
+        try:
+            code = await Generator().run(ctx, spec, request, profile)
+        except ValueError as exc:
+            raise HTTPException(422, str(exc)) from None
+        endpoint = spec.endpoints[request.endpoint]
+        sample = (
+            store.get("sample_cache", endpoint.response_sample_ref)
+            if endpoint.response_sample_ref
+            else None
+        )
+        return {
+            "code": code,
+            "filename": spec.name + ".py",
+            "sample": sample,
+            "events": [event.model_dump(mode="json") for _, event in store.events(request.job_id)],
+        }
+
+    @app.get("/api/jobs/{job_id}/event-log")
+    def event_log(job_id: str):
+        if not store.job(job_id):
+            raise HTTPException(404, "Job not found")
+        return [event.model_dump(mode="json") for _, event in store.events(job_id)]
 
     @app.get("/api/jobs/{job_id}")
     def get_job(job_id: str):

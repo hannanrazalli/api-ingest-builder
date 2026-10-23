@@ -1,0 +1,4 @@
+{% include 'common.py.j2' %}
+
+if __name__ == "__main__":
+    print(to_ndjson(fetch_records({{ options.start_date.isoformat()|py }}, {{ options.end_date.isoformat()|py }})))

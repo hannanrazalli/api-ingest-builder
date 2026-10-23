@@ -1,0 +1,25 @@
+# Source: {{ source_url }}
+import os
+
+import requests
+
+url = {{ url|py }}
+headers = {{ headers|py }}
+params = {{ snippet_params|py }}
+{% if spec.auth.required %}
+api_key = os.getenv({{ spec.auth.env_var|py }})
+if not api_key:
+    raise RuntimeError({{ ('Set ' + spec.auth.env_var + ' in your environment')|py }})
+{% if spec.auth.type == 'header' %}
+headers[{{ spec.auth.header_name|py }}] = api_key
+{% elif spec.auth.type == 'query' %}
+params[{{ spec.auth.query_name|py }}] = api_key
+{% elif spec.auth.type == 'bearer' %}
+headers["Authorization"] = "Bearer " + api_key
+{% endif %}
+{% endif %}
+response = requests.get(url, headers=headers, params=params, timeout=30, allow_redirects=False)
+if 300 <= response.status_code < 400:
+    raise RuntimeError("Redirect refused to protect API credentials")
+response.raise_for_status()
+data = response.json()
