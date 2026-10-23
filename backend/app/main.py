@@ -207,6 +207,32 @@ def create_app(db_path=None, static_dir=None):
         except Exception:
             raise HTTPException(422, "Verification failed; check sample data and SQL") from None
 
+    @app.get("/api/demo-events/{scenario}")
+    def demo_events(scenario: str):
+        import json
+
+        allowed = {
+            "office_full",
+            "coingecko_cache_miss",
+            "coingecko_cache_hit",
+            "coingecko_repair",
+            "coingecko_budget_blocked",
+            "frankfurter_openapi",
+            "frankfurter_docs_not_found",
+        }
+        if scenario not in allowed:
+            raise HTTPException(404, "Replay not found")
+        path = Path(__file__).parents[1] / "fixtures/demo_events" / (scenario + ".json")
+        events = [
+            Event.model_validate(item).model_dump(mode="json")
+            for item in json.loads(path.read_text(encoding="utf-8"))
+        ]
+        saved = None
+        if scenario in {"office_full", "coingecko_cache_hit"}:
+            baseline = json.loads((path.parent / "coingecko_cache_miss.json").read_text())
+            saved = sum(item["llm"]["input_tokens"] or 0 for item in baseline if item["llm"])
+        return {"events": events, "saved_tokens": saved}
+
     @app.get("/api/jobs/{job_id}/event-log")
     def event_log(job_id: str):
         if not store.job(job_id):

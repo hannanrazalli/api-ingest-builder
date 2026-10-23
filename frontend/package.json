@@ -7,7 +7,7 @@
     "dev": "next dev --hostname 127.0.0.1",
     "build": "node scripts/copy-monaco.mjs && next build --webpack",
     "lint": "tsc --noEmit",
-    "test": "tsc --noEmit"
+    "test": "tsc --noEmit && node scripts/test-office.mjs"
   },
   "dependencies": {
     "@monaco-editor/react": "^4.7.0",

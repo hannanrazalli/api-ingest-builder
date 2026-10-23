@@ -1,0 +1,1020 @@
+[
+  {
+    "job_id": "office-full-recording",
+    "ts": 1792713600.0,
+    "agent": "orchestrator",
+    "state": "walking",
+    "task": "Research API documentation",
+    "detail": null,
+    "llm": null,
+    "cache_hit": null
+  },
+  {
+    "job_id": "office-full-recording",
+    "ts": 1792713600.4,
+    "agent": "orchestrator",
+    "state": "working",
+    "task": "Research API documentation",
+    "detail": null,
+    "llm": null,
+    "cache_hit": null
+  },
+  {
+    "job_id": "office-full-recording",
+    "ts": 1792713600.8,
+    "agent": "prober",
+    "state": "walking",
+    "task": "Discover API documentation",
+    "detail": null,
+    "llm": null,
+    "cache_hit": null
+  },
+  {
+    "job_id": "office-full-recording",
+    "ts": 1792713601.2,
+    "agent": "prober",
+    "state": "working",
+    "task": "Discover API documentation",
+    "detail": null,
+    "llm": null,
+    "cache_hit": null
+  },
+  {
+    "job_id": "office-full-recording",
+    "ts": 1792713601.6,
+    "agent": "prober",
+    "state": "working",
+    "task": "Found 2 possible documentation pages",
+    "detail": null,
+    "llm": null,
+    "cache_hit": null
+  },
+  {
+    "job_id": "office-full-recording",
+    "ts": 1792713602.0,
+    "agent": "prober",
+    "state": "success",
+    "task": "Discover API documentation complete",
+    "detail": null,
+    "llm": null,
+    "cache_hit": null
+  },
+  {
+    "job_id": "office-full-recording",
+    "ts": 1792713602.4,
+    "agent": "fetcher",
+    "state": "walking",
+    "task": "Fetch and clean documentation",
+    "detail": null,
+    "llm": null,
+    "cache_hit": null
+  },
+  {
+    "job_id": "office-full-recording",
+    "ts": 1792713602.8,
+    "agent": "fetcher",
+    "state": "working",
+    "task": "Fetch and clean documentation",
+    "detail": null,
+    "llm": null,
+    "cache_hit": null
+  },
+  {
+    "job_id": "office-full-recording",
+    "ts": 1792713603.2,
+    "agent": "fetcher",
+    "state": "working",
+    "task": "Kept 2 unique documentation pages",
+    "detail": null,
+    "llm": null,
+    "cache_hit": null
+  },
+  {
+    "job_id": "office-full-recording",
+    "ts": 1792713603.6,
+    "agent": "fetcher",
+    "state": "success",
+    "task": "Fetch and clean documentation complete",
+    "detail": null,
+    "llm": null,
+    "cache_hit": null
+  },
+  {
+    "job_id": "office-full-recording",
+    "ts": 1792713604.0,
+    "agent": "retriever",
+    "state": "walking",
+    "task": "Rank relevant documentation",
+    "detail": null,
+    "llm": null,
+    "cache_hit": null
+  },
+  {
+    "job_id": "office-full-recording",
+    "ts": 1792713604.4,
+    "agent": "retriever",
+    "state": "working",
+    "task": "Rank relevant documentation",
+    "detail": null,
+    "llm": null,
+    "cache_hit": null
+  },
+  {
+    "job_id": "office-full-recording",
+    "ts": 1792713604.8,
+    "agent": "retriever",
+    "state": "working",
+    "task": "Selected 2 bounded chunks from 2",
+    "detail": null,
+    "llm": null,
+    "cache_hit": null
+  },
+  {
+    "job_id": "office-full-recording",
+    "ts": 1792713605.2,
+    "agent": "retriever",
+    "state": "success",
+    "task": "Rank relevant documentation complete",
+    "detail": null,
+    "llm": null,
+    "cache_hit": null
+  },
+  {
+    "job_id": "office-full-recording",
+    "ts": 1792713605.6,
+    "agent": "extractor",
+    "state": "walking",
+    "task": "Extract a source-backed API specification",
+    "detail": null,
+    "llm": null,
+    "cache_hit": null
+  },
+  {
+    "job_id": "office-full-recording",
+    "ts": 1792713606.0,
+    "agent": "extractor",
+    "state": "working",
+    "task": "Extract a source-backed API specification",
+    "detail": null,
+    "llm": null,
+    "cache_hit": null
+  },
+  {
+    "job_id": "office-full-recording",
+    "ts": 1792713606.4,
+    "agent": "extractor",
+    "state": "working",
+    "task": "Use 2 retrieved chunks only",
+    "detail": null,
+    "llm": null,
+    "cache_hit": null
+  },
+  {
+    "job_id": "office-full-recording",
+    "ts": 1792713606.8,
+    "agent": "extractor",
+    "state": "working",
+    "task": "Checking structured response cache",
+    "detail": null,
+    "llm": null,
+    "cache_hit": null
+  },
+  {
+    "job_id": "office-full-recording",
+    "ts": 1792713607.2,
+    "agent": "extractor",
+    "state": "working",
+    "task": "Requesting structured result within reserved budget",
+    "detail": null,
+    "llm": null,
+    "cache_hit": null
+  },
+  {
+    "job_id": "office-full-recording",
+    "ts": 1792713607.6,
+    "agent": "extractor",
+    "state": "success",
+    "task": "Structured result validated",
+    "detail": null,
+    "llm": {
+      "model": "fixture-smart",
+      "input_tokens": 500,
+      "output_tokens": 150,
+      "cached_tokens": 0,
+      "cost_usd": 0.0
+    },
+    "cache_hit": false
+  },
+  {
+    "job_id": "office-full-recording",
+    "ts": 1792713608.0,
+    "agent": "extractor",
+    "state": "success",
+    "task": "Extract a source-backed API specification complete",
+    "detail": null,
+    "llm": null,
+    "cache_hit": null
+  },
+  {
+    "job_id": "office-full-recording",
+    "ts": 1792713608.4,
+    "agent": "verifier",
+    "state": "walking",
+    "task": "Verify one safe GET operation",
+    "detail": null,
+    "llm": null,
+    "cache_hit": null
+  },
+  {
+    "job_id": "office-full-recording",
+    "ts": 1792713608.8,
+    "agent": "verifier",
+    "state": "working",
+    "task": "Verify one safe GET operation",
+    "detail": null,
+    "llm": null,
+    "cache_hit": null
+  },
+  {
+    "job_id": "office-full-recording",
+    "ts": 1792713609.2,
+    "agent": "verifier",
+    "state": "error",
+    "task": "Step failed; inspect the safe job warning",
+    "detail": null,
+    "llm": null,
+    "cache_hit": null
+  },
+  {
+    "job_id": "office-full-recording",
+    "ts": 1792713609.6,
+    "agent": "repair",
+    "state": "walking",
+    "task": "Repair the failed verification",
+    "detail": null,
+    "llm": null,
+    "cache_hit": null
+  },
+  {
+    "job_id": "office-full-recording",
+    "ts": 1792713610.0,
+    "agent": "repair",
+    "state": "working",
+    "task": "Repair the failed verification",
+    "detail": null,
+    "llm": null,
+    "cache_hit": null
+  },
+  {
+    "job_id": "office-full-recording",
+    "ts": 1792713610.4,
+    "agent": "repair",
+    "state": "working",
+    "task": "Use the fast model",
+    "detail": null,
+    "llm": null,
+    "cache_hit": null
+  },
+  {
+    "job_id": "office-full-recording",
+    "ts": 1792713610.8,
+    "agent": "repair",
+    "state": "working",
+    "task": "Checking structured response cache",
+    "detail": null,
+    "llm": null,
+    "cache_hit": null
+  },
+  {
+    "job_id": "office-full-recording",
+    "ts": 1792713611.2,
+    "agent": "repair",
+    "state": "working",
+    "task": "Requesting structured result within reserved budget",
+    "detail": null,
+    "llm": null,
+    "cache_hit": null
+  },
+  {
+    "job_id": "office-full-recording",
+    "ts": 1792713611.6,
+    "agent": "repair",
+    "state": "success",
+    "task": "Structured result validated",
+    "detail": null,
+    "llm": {
+      "model": "fixture-fast",
+      "input_tokens": 500,
+      "output_tokens": 150,
+      "cached_tokens": 0,
+      "cost_usd": 0.0
+    },
+    "cache_hit": false
+  },
+  {
+    "job_id": "office-full-recording",
+    "ts": 1792713612.0,
+    "agent": "repair",
+    "state": "success",
+    "task": "Repair the failed verification complete",
+    "detail": null,
+    "llm": null,
+    "cache_hit": null
+  },
+  {
+    "job_id": "office-full-recording",
+    "ts": 1792713612.4,
+    "agent": "verifier",
+    "state": "walking",
+    "task": "Verify one safe GET operation",
+    "detail": null,
+    "llm": null,
+    "cache_hit": null
+  },
+  {
+    "job_id": "office-full-recording",
+    "ts": 1792713612.8,
+    "agent": "verifier",
+    "state": "working",
+    "task": "Verify one safe GET operation",
+    "detail": null,
+    "llm": null,
+    "cache_hit": null
+  },
+  {
+    "job_id": "office-full-recording",
+    "ts": 1792713613.2,
+    "agent": "verifier",
+    "state": "error",
+    "task": "Step failed; inspect the safe job warning",
+    "detail": null,
+    "llm": null,
+    "cache_hit": null
+  },
+  {
+    "job_id": "office-full-recording",
+    "ts": 1792713613.6,
+    "agent": "repair",
+    "state": "walking",
+    "task": "Repair the failed verification",
+    "detail": null,
+    "llm": null,
+    "cache_hit": null
+  },
+  {
+    "job_id": "office-full-recording",
+    "ts": 1792713614.0,
+    "agent": "repair",
+    "state": "working",
+    "task": "Repair the failed verification",
+    "detail": null,
+    "llm": null,
+    "cache_hit": null
+  },
+  {
+    "job_id": "office-full-recording",
+    "ts": 1792713614.4,
+    "agent": "repair",
+    "state": "working",
+    "task": "Escalate to the smart model",
+    "detail": null,
+    "llm": null,
+    "cache_hit": null
+  },
+  {
+    "job_id": "office-full-recording",
+    "ts": 1792713614.8,
+    "agent": "repair",
+    "state": "working",
+    "task": "Checking structured response cache",
+    "detail": null,
+    "llm": null,
+    "cache_hit": null
+  },
+  {
+    "job_id": "office-full-recording",
+    "ts": 1792713615.2,
+    "agent": "repair",
+    "state": "working",
+    "task": "Requesting structured result within reserved budget",
+    "detail": null,
+    "llm": null,
+    "cache_hit": null
+  },
+  {
+    "job_id": "office-full-recording",
+    "ts": 1792713615.6,
+    "agent": "repair",
+    "state": "success",
+    "task": "Structured result validated",
+    "detail": null,
+    "llm": {
+      "model": "fixture-smart",
+      "input_tokens": 500,
+      "output_tokens": 150,
+      "cached_tokens": 0,
+      "cost_usd": 0.0
+    },
+    "cache_hit": false
+  },
+  {
+    "job_id": "office-full-recording",
+    "ts": 1792713616.0,
+    "agent": "repair",
+    "state": "success",
+    "task": "Repair the failed verification complete",
+    "detail": null,
+    "llm": null,
+    "cache_hit": null
+  },
+  {
+    "job_id": "office-full-recording",
+    "ts": 1792713616.4,
+    "agent": "verifier",
+    "state": "walking",
+    "task": "Verify one safe GET operation",
+    "detail": null,
+    "llm": null,
+    "cache_hit": null
+  },
+  {
+    "job_id": "office-full-recording",
+    "ts": 1792713616.8,
+    "agent": "verifier",
+    "state": "working",
+    "task": "Verify one safe GET operation",
+    "detail": null,
+    "llm": null,
+    "cache_hit": null
+  },
+  {
+    "job_id": "office-full-recording",
+    "ts": 1792713617.2,
+    "agent": "verifier",
+    "state": "working",
+    "task": "GET returned valid JSON; parameter acceptance is observational, not guaranteed",
+    "detail": null,
+    "llm": null,
+    "cache_hit": null
+  },
+  {
+    "job_id": "office-full-recording",
+    "ts": 1792713617.6,
+    "agent": "verifier",
+    "state": "success",
+    "task": "Verify one safe GET operation complete",
+    "detail": null,
+    "llm": null,
+    "cache_hit": null
+  },
+  {
+    "job_id": "office-full-recording",
+    "ts": 1792713618.0,
+    "agent": "profiler",
+    "state": "walking",
+    "task": "Profile the response structure",
+    "detail": null,
+    "llm": null,
+    "cache_hit": null
+  },
+  {
+    "job_id": "office-full-recording",
+    "ts": 1792713618.4,
+    "agent": "profiler",
+    "state": "working",
+    "task": "Profile the response structure",
+    "detail": null,
+    "llm": null,
+    "cache_hit": null
+  },
+  {
+    "job_id": "office-full-recording",
+    "ts": 1792713618.8,
+    "agent": "profiler",
+    "state": "working",
+    "task": "Depth 3; 0 record arrays",
+    "detail": null,
+    "llm": null,
+    "cache_hit": null
+  },
+  {
+    "job_id": "office-full-recording",
+    "ts": 1792713619.2,
+    "agent": "profiler",
+    "state": "success",
+    "task": "Profile the response structure complete",
+    "detail": null,
+    "llm": null,
+    "cache_hit": null
+  },
+  {
+    "job_id": "office-full-recording",
+    "ts": 1792713619.6,
+    "agent": "orchestrator",
+    "state": "working",
+    "task": "Research finished with source-backed results",
+    "detail": null,
+    "llm": null,
+    "cache_hit": null
+  },
+  {
+    "job_id": "office-full-recording",
+    "ts": 1792713620.0,
+    "agent": "orchestrator",
+    "state": "success",
+    "task": "Research API documentation complete",
+    "detail": null,
+    "llm": null,
+    "cache_hit": null
+  },
+  {
+    "job_id": "office-full-recording",
+    "ts": 1792713620.4,
+    "agent": "orchestrator",
+    "state": "walking",
+    "task": "Research API documentation",
+    "detail": null,
+    "llm": null,
+    "cache_hit": null
+  },
+  {
+    "job_id": "office-full-recording",
+    "ts": 1792713620.8,
+    "agent": "orchestrator",
+    "state": "working",
+    "task": "Research API documentation",
+    "detail": null,
+    "llm": null,
+    "cache_hit": null
+  },
+  {
+    "job_id": "office-full-recording",
+    "ts": 1792713621.2,
+    "agent": "orchestrator",
+    "state": "working",
+    "task": "Loaded archived specification; zero LLM calls",
+    "detail": null,
+    "llm": null,
+    "cache_hit": null
+  },
+  {
+    "job_id": "office-full-recording",
+    "ts": 1792713621.6,
+    "agent": "prober",
+    "state": "success",
+    "task": "Returned with an archived specification",
+    "detail": null,
+    "llm": null,
+    "cache_hit": true
+  },
+  {
+    "job_id": "office-full-recording",
+    "ts": 1792713622.0,
+    "agent": "verifier",
+    "state": "walking",
+    "task": "Verify one safe GET operation",
+    "detail": null,
+    "llm": null,
+    "cache_hit": null
+  },
+  {
+    "job_id": "office-full-recording",
+    "ts": 1792713622.4,
+    "agent": "verifier",
+    "state": "working",
+    "task": "Verify one safe GET operation",
+    "detail": null,
+    "llm": null,
+    "cache_hit": null
+  },
+  {
+    "job_id": "office-full-recording",
+    "ts": 1792713622.8,
+    "agent": "verifier",
+    "state": "working",
+    "task": "GET returned valid JSON; parameter acceptance is observational, not guaranteed",
+    "detail": null,
+    "llm": null,
+    "cache_hit": null
+  },
+  {
+    "job_id": "office-full-recording",
+    "ts": 1792713623.2,
+    "agent": "verifier",
+    "state": "success",
+    "task": "Verify one safe GET operation complete",
+    "detail": null,
+    "llm": null,
+    "cache_hit": null
+  },
+  {
+    "job_id": "office-full-recording",
+    "ts": 1792713623.6,
+    "agent": "profiler",
+    "state": "walking",
+    "task": "Profile the response structure",
+    "detail": null,
+    "llm": null,
+    "cache_hit": null
+  },
+  {
+    "job_id": "office-full-recording",
+    "ts": 1792713624.0,
+    "agent": "profiler",
+    "state": "working",
+    "task": "Profile the response structure",
+    "detail": null,
+    "llm": null,
+    "cache_hit": null
+  },
+  {
+    "job_id": "office-full-recording",
+    "ts": 1792713624.4,
+    "agent": "profiler",
+    "state": "working",
+    "task": "Depth 3; 0 record arrays",
+    "detail": null,
+    "llm": null,
+    "cache_hit": null
+  },
+  {
+    "job_id": "office-full-recording",
+    "ts": 1792713624.8,
+    "agent": "profiler",
+    "state": "success",
+    "task": "Profile the response structure complete",
+    "detail": null,
+    "llm": null,
+    "cache_hit": null
+  },
+  {
+    "job_id": "office-full-recording",
+    "ts": 1792713625.2,
+    "agent": "orchestrator",
+    "state": "working",
+    "task": "Research finished with source-backed results",
+    "detail": null,
+    "llm": null,
+    "cache_hit": null
+  },
+  {
+    "job_id": "office-full-recording",
+    "ts": 1792713625.6,
+    "agent": "orchestrator",
+    "state": "success",
+    "task": "Research API documentation complete",
+    "detail": null,
+    "llm": null,
+    "cache_hit": null
+  },
+  {
+    "job_id": "office-full-recording",
+    "ts": 1792713626.0,
+    "agent": "orchestrator",
+    "state": "walking",
+    "task": "Research API documentation",
+    "detail": null,
+    "llm": null,
+    "cache_hit": null
+  },
+  {
+    "job_id": "office-full-recording",
+    "ts": 1792713626.4,
+    "agent": "orchestrator",
+    "state": "working",
+    "task": "Research API documentation",
+    "detail": null,
+    "llm": null,
+    "cache_hit": null
+  },
+  {
+    "job_id": "office-full-recording",
+    "ts": 1792713626.8,
+    "agent": "prober",
+    "state": "walking",
+    "task": "Discover API documentation",
+    "detail": null,
+    "llm": null,
+    "cache_hit": null
+  },
+  {
+    "job_id": "office-full-recording",
+    "ts": 1792713627.2,
+    "agent": "prober",
+    "state": "working",
+    "task": "Discover API documentation",
+    "detail": null,
+    "llm": null,
+    "cache_hit": null
+  },
+  {
+    "job_id": "office-full-recording",
+    "ts": 1792713627.6,
+    "agent": "prober",
+    "state": "working",
+    "task": "Parsed 1 documented operations without an LLM",
+    "detail": null,
+    "llm": null,
+    "cache_hit": null
+  },
+  {
+    "job_id": "office-full-recording",
+    "ts": 1792713628.0,
+    "agent": "prober",
+    "state": "success",
+    "task": "Discover API documentation complete",
+    "detail": null,
+    "llm": null,
+    "cache_hit": null
+  },
+  {
+    "job_id": "office-full-recording",
+    "ts": 1792713628.4,
+    "agent": "fetcher",
+    "state": "walking",
+    "task": "Fetch and clean documentation",
+    "detail": null,
+    "llm": null,
+    "cache_hit": null
+  },
+  {
+    "job_id": "office-full-recording",
+    "ts": 1792713628.8,
+    "agent": "fetcher",
+    "state": "working",
+    "task": "Fetch and clean documentation",
+    "detail": null,
+    "llm": null,
+    "cache_hit": null
+  },
+  {
+    "job_id": "office-full-recording",
+    "ts": 1792713629.2,
+    "agent": "fetcher",
+    "state": "working",
+    "task": "Kept 1 unique documentation pages",
+    "detail": null,
+    "llm": null,
+    "cache_hit": null
+  },
+  {
+    "job_id": "office-full-recording",
+    "ts": 1792713629.6,
+    "agent": "fetcher",
+    "state": "success",
+    "task": "Fetch and clean documentation complete",
+    "detail": null,
+    "llm": null,
+    "cache_hit": null
+  },
+  {
+    "job_id": "office-full-recording",
+    "ts": 1792713630.0,
+    "agent": "retriever",
+    "state": "sleeping",
+    "task": "OpenAPI parsed directly; retrieval not needed",
+    "detail": null,
+    "llm": null,
+    "cache_hit": null
+  },
+  {
+    "job_id": "office-full-recording",
+    "ts": 1792713630.4,
+    "agent": "extractor",
+    "state": "sleeping",
+    "task": "OpenAPI covers these operations; zero LLM calls",
+    "detail": null,
+    "llm": null,
+    "cache_hit": null
+  },
+  {
+    "job_id": "office-full-recording",
+    "ts": 1792713630.8,
+    "agent": "verifier",
+    "state": "walking",
+    "task": "Verify one safe GET operation",
+    "detail": null,
+    "llm": null,
+    "cache_hit": null
+  },
+  {
+    "job_id": "office-full-recording",
+    "ts": 1792713631.2,
+    "agent": "verifier",
+    "state": "working",
+    "task": "Verify one safe GET operation",
+    "detail": null,
+    "llm": null,
+    "cache_hit": null
+  },
+  {
+    "job_id": "office-full-recording",
+    "ts": 1792713631.6,
+    "agent": "verifier",
+    "state": "working",
+    "task": "Use recorded response example; not a live verification",
+    "detail": null,
+    "llm": null,
+    "cache_hit": null
+  },
+  {
+    "job_id": "office-full-recording",
+    "ts": 1792713632.0,
+    "agent": "verifier",
+    "state": "success",
+    "task": "Verify one safe GET operation complete",
+    "detail": null,
+    "llm": null,
+    "cache_hit": null
+  },
+  {
+    "job_id": "office-full-recording",
+    "ts": 1792713632.4,
+    "agent": "profiler",
+    "state": "walking",
+    "task": "Profile the response structure",
+    "detail": null,
+    "llm": null,
+    "cache_hit": null
+  },
+  {
+    "job_id": "office-full-recording",
+    "ts": 1792713632.8,
+    "agent": "profiler",
+    "state": "working",
+    "task": "Profile the response structure",
+    "detail": null,
+    "llm": null,
+    "cache_hit": null
+  },
+  {
+    "job_id": "office-full-recording",
+    "ts": 1792713633.2,
+    "agent": "profiler",
+    "state": "working",
+    "task": "Depth 2; 1 record arrays",
+    "detail": null,
+    "llm": null,
+    "cache_hit": null
+  },
+  {
+    "job_id": "office-full-recording",
+    "ts": 1792713633.6,
+    "agent": "profiler",
+    "state": "success",
+    "task": "Profile the response structure complete",
+    "detail": null,
+    "llm": null,
+    "cache_hit": null
+  },
+  {
+    "job_id": "office-full-recording",
+    "ts": 1792713634.0,
+    "agent": "orchestrator",
+    "state": "working",
+    "task": "Research finished with source-backed results",
+    "detail": null,
+    "llm": null,
+    "cache_hit": null
+  },
+  {
+    "job_id": "office-full-recording",
+    "ts": 1792713634.4,
+    "agent": "orchestrator",
+    "state": "success",
+    "task": "Research API documentation complete",
+    "detail": null,
+    "llm": null,
+    "cache_hit": null
+  },
+  {
+    "job_id": "office-full-recording",
+    "ts": 1792713634.8,
+    "agent": "generator",
+    "state": "walking",
+    "task": "Render deterministic Python code",
+    "detail": null,
+    "llm": null,
+    "cache_hit": null
+  },
+  {
+    "job_id": "office-full-recording",
+    "ts": 1792713635.2,
+    "agent": "generator",
+    "state": "working",
+    "task": "Render deterministic Python code",
+    "detail": null,
+    "llm": null,
+    "cache_hit": null
+  },
+  {
+    "job_id": "office-full-recording",
+    "ts": 1792713635.6,
+    "agent": "generator",
+    "state": "working",
+    "task": "Validated template fields and Python syntax; zero LLM calls",
+    "detail": null,
+    "llm": null,
+    "cache_hit": null
+  },
+  {
+    "job_id": "office-full-recording",
+    "ts": 1792713636.0,
+    "agent": "generator",
+    "state": "success",
+    "task": "Render deterministic Python code complete",
+    "detail": null,
+    "llm": null,
+    "cache_hit": null
+  },
+  {
+    "job_id": "office-full-recording",
+    "ts": 1792713636.4,
+    "agent": "converter",
+    "state": "walking",
+    "task": "Convert SQL AST to DataFrame operations",
+    "detail": null,
+    "llm": null,
+    "cache_hit": null
+  },
+  {
+    "job_id": "office-full-recording",
+    "ts": 1792713636.8,
+    "agent": "converter",
+    "state": "working",
+    "task": "Convert SQL AST to DataFrame operations",
+    "detail": null,
+    "llm": null,
+    "cache_hit": null
+  },
+  {
+    "job_id": "office-full-recording",
+    "ts": 1792713637.2,
+    "agent": "converter",
+    "state": "working",
+    "task": "Syntax validated; deterministic output ready",
+    "detail": null,
+    "llm": null,
+    "cache_hit": null
+  },
+  {
+    "job_id": "office-full-recording",
+    "ts": 1792713637.6,
+    "agent": "converter",
+    "state": "success",
+    "task": "Convert SQL AST to DataFrame operations complete",
+    "detail": null,
+    "llm": null,
+    "cache_hit": null
+  },
+  {
+    "job_id": "office-full-recording",
+    "ts": 1792713638.0,
+    "agent": "explainer",
+    "state": "walking",
+    "task": "Explain code in the selected language",
+    "detail": null,
+    "llm": null,
+    "cache_hit": null
+  },
+  {
+    "job_id": "office-full-recording",
+    "ts": 1792713638.4,
+    "agent": "explainer",
+    "state": "working",
+    "task": "Explain code in the selected language",
+    "detail": null,
+    "llm": null,
+    "cache_hit": null
+  },
+  {
+    "job_id": "office-full-recording",
+    "ts": 1792713638.8,
+    "agent": "explainer",
+    "state": "working",
+    "task": "Detected SQL using local syntax heuristics",
+    "detail": null,
+    "llm": null,
+    "cache_hit": null
+  },
+  {
+    "job_id": "office-full-recording",
+    "ts": 1792713639.2,
+    "agent": "explainer",
+    "state": "working",
+    "task": "Explanation ready",
+    "detail": null,
+    "llm": null,
+    "cache_hit": false
+  },
+  {
+    "job_id": "office-full-recording",
+    "ts": 1792713639.6,
+    "agent": "explainer",
+    "state": "success",
+    "task": "Explain code in the selected language complete",
+    "detail": null,
+    "llm": null,
+    "cache_hit": null
+  }
+]

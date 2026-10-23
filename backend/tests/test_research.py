@@ -211,7 +211,9 @@ def test_recorded_demo_logs_contract():
     assert len(files) >= 6
     for file in files:
         events = [Event.model_validate(event) for event in json.loads(file.read_text())]
-        assert events and events[-1].agent == "orchestrator"
+        assert events and events[-1].state in {"success", "error", "waiting"}
+        if file.stem != "office_full":
+            assert events[-1].agent == "orchestrator"
         assert not any("fixture-target-key" in e.model_dump_json() for e in events)
 
 

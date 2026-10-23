@@ -1,0 +1,165 @@
+{
+  "width": 42,
+  "height": 29,
+  "tile": 16,
+  "entrance": [
+    20,
+    28
+  ],
+  "zones": [
+    {
+      "agent": "prober",
+      "name": "Entrance",
+      "role": "SCOUT",
+      "x": 2,
+      "y": 2,
+      "w": 8,
+      "h": 7,
+      "target": [
+        5,
+        7
+      ],
+      "color": 1
+    },
+    {
+      "agent": "fetcher",
+      "name": "Mailroom",
+      "role": "COURIER",
+      "x": 12,
+      "y": 2,
+      "w": 8,
+      "h": 7,
+      "target": [
+        15,
+        7
+      ],
+      "color": 2
+    },
+    {
+      "agent": "retriever",
+      "name": "Library",
+      "role": "LIBRARIAN",
+      "x": 22,
+      "y": 2,
+      "w": 8,
+      "h": 7,
+      "target": [
+        25,
+        7
+      ],
+      "color": 3
+    },
+    {
+      "agent": "extractor",
+      "name": "Analysis",
+      "role": "ANALYST",
+      "x": 32,
+      "y": 2,
+      "w": 8,
+      "h": 7,
+      "target": [
+        35,
+        7
+      ],
+      "color": 4
+    },
+    {
+      "agent": "verifier",
+      "name": "QA lab",
+      "role": "VERIFIER",
+      "x": 2,
+      "y": 11,
+      "w": 8,
+      "h": 7,
+      "target": [
+        5,
+        16
+      ],
+      "color": 5
+    },
+    {
+      "agent": "profiler",
+      "name": "Profiler",
+      "role": "PROFILER",
+      "x": 12,
+      "y": 11,
+      "w": 8,
+      "h": 7,
+      "target": [
+        15,
+        16
+      ],
+      "color": 6
+    },
+    {
+      "agent": "repair",
+      "name": "Workshop",
+      "role": "MECHANIC",
+      "x": 22,
+      "y": 11,
+      "w": 8,
+      "h": 7,
+      "target": [
+        25,
+        16
+      ],
+      "color": 7
+    },
+    {
+      "agent": "generator",
+      "name": "Print room",
+      "role": "GENERATOR",
+      "x": 32,
+      "y": 11,
+      "w": 8,
+      "h": 7,
+      "target": [
+        35,
+        16
+      ],
+      "color": 8
+    },
+    {
+      "agent": "converter",
+      "name": "Converter",
+      "role": "CONVERTER",
+      "x": 2,
+      "y": 20,
+      "w": 8,
+      "h": 7,
+      "target": [
+        5,
+        25
+      ],
+      "color": 9
+    },
+    {
+      "agent": "explainer",
+      "name": "Explain",
+      "role": "EXPLAINER",
+      "x": 12,
+      "y": 20,
+      "w": 8,
+      "h": 7,
+      "target": [
+        15,
+        25
+      ],
+      "color": 10
+    },
+    {
+      "agent": "orchestrator",
+      "name": "Front desk",
+      "role": "DISPATCHER",
+      "x": 26,
+      "y": 20,
+      "w": 12,
+      "h": 7,
+      "target": [
+        29,
+        25
+      ],
+      "color": 11
+    }
+  ]
+}
