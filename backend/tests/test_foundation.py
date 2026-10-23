@@ -278,3 +278,74 @@ def test_explicit_demo_retains_key_but_disables_provider(tmp_path):
         assert not client.put("/api/settings", json={"model_fast": "configured"}).json()[
             "demo_mode"
         ]
+
+
+@pytest.mark.parametrize(
+    "environment,limit",
+    [
+        ("MAX_LLM_CALLS", "max_llm_calls"),
+        ("MAX_INPUT_TOKENS", "max_input_tokens"),
+    ],
+)
+def test_environment_budget_blocks_provider_before_network(store, monkeypatch, environment, limit):
+    monkeypatch.setenv(environment, "0")
+    store.save_settings(Settings(api_key=SecretStr("audit-placeholder"), model_fast="configured"))
+    settings = effective_settings(store)
+    assert getattr(settings, limit) == 0
+    job = Job(id=environment)
+    store.save_job(job)
+
+    def forbidden_network(request):
+        pytest.fail("Budget exceeded but provider network request was sent")
+
+    provider = Provider(
+        settings,
+        store,
+        CostGuard(settings, job),
+        EventBus(store),
+        httpx.MockTransport(forbidden_network),
+    )
+    with pytest.raises(BudgetExceeded):
+        asyncio.run(provider.structured("explainer", "input", Result))
+    assert job.calls == 0
+    assert store.job(job.id).status == "waiting"
+
+
+def test_settings_key_absent_from_responses_and_logs(tmp_path, caplog):
+    import logging
+
+    from backend.app.main import create_app
+
+    sentinel = "audit-placeholder-do-not-log"
+    caplog.set_level(logging.DEBUG)
+    with TestClient(create_app(tmp_path / "audit.sqlite3")) as client:
+        for response in [
+            client.put("/api/settings", json={"api_key": sentinel}),
+            client.get("/api/settings"),
+            client.put("/api/settings", json={"api_key": sentinel, "provider": "invalid"}),
+        ]:
+            assert sentinel not in response.text
+        masked = client.get("/api/settings").json()
+        assert masked["api_key_masked"] == "********" and "api_key" not in masked
+    assert sentinel not in caplog.text
+
+
+def test_event_shape_matches_agents_section_seven():
+    import re
+    from pathlib import Path
+
+    from backend.models import Usage
+
+    instructions = Path("AGENTS.md").read_text(encoding="utf-8")
+    section = instructions.split("## 7.", 1)[1].split("## 8.", 1)[0]
+    expected = json.loads(re.search(r"```json\s*(.*?)```", section, re.DOTALL).group(1))
+    schema = Event.model_json_schema()
+    assert set(schema["properties"]) == set(expected)
+    assert set(Usage.model_fields) == set(expected["llm"])
+    assert schema["properties"]["agent"]["enum"] == expected["agent"].split("|")
+    assert schema["properties"]["state"]["enum"] == expected["state"].split("|")
+    for field in ["job_id", "task"]:
+        assert schema["properties"][field]["type"] == "string"
+    assert schema["properties"]["ts"]["type"] == "number"
+    for field in ["detail", "llm", "cache_hit"]:
+        assert any(item.get("type") == "null" for item in schema["properties"][field]["anyOf"])

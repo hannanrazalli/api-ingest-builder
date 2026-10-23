@@ -179,3 +179,38 @@ def test_compressed_response_rejected():
     )
     with pytest.raises(UnsafeURL, match="Compressed"):
         asyncio.run(fetcher.get("https://example.com"))
+
+
+@pytest.mark.parametrize(
+    "url",
+    [
+        "http://127.0.0.1",
+        "http://localhost",
+        "http://169.254.169.254",
+        "http://10.0.0.1",
+    ],
+)
+def test_requested_private_urls_never_reach_transport(url):
+    def forbidden_transport(address):
+        pytest.fail("Blocked URL reached the HTTP transport")
+
+    with pytest.raises(UnsafeURL):
+        asyncio.run(SafeFetcher(transport_factory=forbidden_transport).get(url))
+
+
+def test_public_redirect_to_literal_private_ip_never_fetched():
+    seen = []
+
+    async def resolver(host, port):
+        return ["93.184.216.34"] if host == "public.example" else [host]
+
+    def redirect(request):
+        seen.append(str(request.url))
+        return httpx.Response(302, headers={"location": "http://169.254.169.254/latest"})
+
+    fetcher = SafeFetcher(
+        resolver=resolver, transport_factory=lambda address: httpx.MockTransport(redirect)
+    )
+    with pytest.raises(UnsafeURL):
+        asyncio.run(fetcher.get("https://public.example/docs"))
+    assert seen == ["https://public.example/docs"]
