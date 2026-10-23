@@ -31,7 +31,7 @@ for(const width of [1440,820])test(`main views and onboarding at ${width}px`,asy
  await expect(page.getByRole("button",{name:"Download Python"})).toBeEnabled();
  await expect(page.locator(".monaco-editor")).toBeVisible();
  await page.screenshot({animations:"disabled",path:path.join(shots,`builder-${width===820?"tablet":"coingecko"}.png`),fullPage:true});
- for(const tab of ["Converter","Explain","Office"]){await page.getByRole("tab",{name:tab,exact:true}).click();await expect(page.getByRole("heading",{name:tab==="Converter"?"SQL in. DataFrames out.":tab==="Explain"?"Understand the code behind it.":"A live view of real work.",exact:true})).toBeVisible();await page.screenshot({animations:"disabled",path:path.join(shots,`${tab.toLowerCase()}-${width===820?"tablet":"desktop"}.png`),fullPage:true});}
+ for(const tab of ["Converter","Explain","Office"]){await page.getByRole("tab",{name:tab,exact:true}).click();await expect(page.getByRole("heading",{name:tab==="Converter"?"SQL in. DataFrames out.":tab==="Explain"?"Understand the code behind it.":"A live view of real work.",exact:true})).toBeVisible();if(tab==="Office")await page.screenshot({animations:"disabled",path:path.join(shots,`${tab.toLowerCase()}-${width===820?"tablet":"desktop"}.png`),fullPage:true});}
  await page.getByRole("button",{name:"Settings",exact:true}).click();await expect(page.getByRole("dialog")).toBeVisible();
  // Never check the actual Codex installation/login during development.
  await page.route("**/api/providers/codex/status",route=>route.fulfill({json:{logged_in:false,available:false,code:"cli_missing",message:"Install Codex and run codex login on the host."}}));

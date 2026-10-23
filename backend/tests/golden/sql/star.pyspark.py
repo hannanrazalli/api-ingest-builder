@@ -1,0 +1,1 @@
+df = spark.table("source")

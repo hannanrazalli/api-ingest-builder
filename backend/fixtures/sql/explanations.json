@@ -1,0 +1,89 @@
+[
+  {
+    "input": "select * from source",
+    "English": {
+      "language": "English",
+      "summary": "Copies every column and row from source.",
+      "steps": [
+        "Read source",
+        "Keep every column",
+        "Return the rows"
+      ],
+      "concepts": [
+        "SQL",
+        "Projection"
+      ]
+    },
+    "Malay": {
+      "language": "Malay",
+      "summary": "Menyalin semua lajur dan baris daripada source.",
+      "steps": [
+        "Baca sumber input",
+        "Laksanakan operasi yang dinyatakan",
+        "Simpan hasil untuk langkah seterusnya"
+      ],
+      "concepts": [
+        "SQL",
+        "Data"
+      ]
+    }
+  },
+  {
+    "input": "select category, sum(amount) as total from source group by category",
+    "English": {
+      "language": "English",
+      "summary": "Totals the amount for each category.",
+      "steps": [
+        "Read source",
+        "Group by category",
+        "Sum amount for each group"
+      ],
+      "concepts": [
+        "SQL",
+        "Projection"
+      ]
+    },
+    "Malay": {
+      "language": "Malay",
+      "summary": "Menjumlahkan amount mengikut kategori.",
+      "steps": [
+        "Baca sumber input",
+        "Laksanakan operasi yang dinyatakan",
+        "Simpan hasil untuk langkah seterusnya"
+      ],
+      "concepts": [
+        "SQL",
+        "Data"
+      ]
+    }
+  },
+  {
+    "input": "df = source.copy()",
+    "English": {
+      "language": "English",
+      "summary": "Creates an independent copy of a pandas DataFrame.",
+      "steps": [
+        "Read source",
+        "Copy the DataFrame",
+        "Assign the result to df"
+      ],
+      "concepts": [
+        "DataFrame",
+        "Copy"
+      ]
+    },
+    "Malay": {
+      "language": "Malay",
+      "summary": "Mencipta salinan DataFrame pandas yang berasingan.",
+      "steps": [
+        "Baca sumber input",
+        "Laksanakan operasi yang dinyatakan",
+        "Simpan hasil untuk langkah seterusnya"
+      ],
+      "concepts": [
+        "DataFrame",
+        "Data"
+      ]
+    }
+  }
+]

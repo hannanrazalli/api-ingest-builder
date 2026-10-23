@@ -9,12 +9,18 @@ from fastapi.staticfiles import StaticFiles
 from pydantic import Field, SecretStr, ValidationError
 
 from backend.agents.base import AgentContext
+from backend.agents.converter import Converter
+from backend.agents.explainer import Explainer
 from backend.agents.generator import Generator, sample_preview
 from backend.cache.store import Store
+from backend.converter.verify import verify
+from backend.cost_guard import BudgetExceeded
 from backend.llm.codex_cli import CodexCLI
+from backend.llm.errors import ProviderError
 from backend.models import Event, Job, Model, Settings, SettingsUpdate, Spec
 from backend.models.generation import GenerateRequest
 from backend.models.research import Profile, ResearchRequest
+from backend.models.tools import ConvertRequest, ExplainRequest, VerifyRequest
 from backend.orchestrator.events import EventBus
 from backend.orchestrator.research import ResearchPipeline
 from backend.settings import effective_settings, public_settings
@@ -165,6 +171,41 @@ def create_app(db_path=None, static_dir=None):
             else None,
             "events": [event.model_dump(mode="json") for _, event in store.events(request.job_id)],
         }
+
+    @app.post("/api/convert")
+    async def convert(request: ConvertRequest):
+        try:
+            return await Converter().run(store, request)
+        except BudgetExceeded:
+            raise HTTPException(
+                409, "Cost Guard blocked this job; approve a budget override"
+            ) from None
+        except ProviderError as exc:
+            raise HTTPException(422, str(exc)) from None
+        except Exception:
+            raise HTTPException(
+                422, "Conversion failed; check syntax and supported constructs"
+            ) from None
+
+    @app.post("/api/explain")
+    async def explain(request: ExplainRequest):
+        try:
+            return await Explainer().run(store, request)
+        except BudgetExceeded:
+            raise HTTPException(
+                409, "Cost Guard blocked this job; approve a budget override"
+            ) from None
+        except (ValueError, ProviderError) as exc:
+            raise HTTPException(422, str(exc)) from None
+        except Exception:
+            raise HTTPException(422, "Explanation failed; check provider settings") from None
+
+    @app.post("/api/convert/verify")
+    async def verify_conversion(request: VerifyRequest):
+        try:
+            return await verify(request)
+        except Exception:
+            raise HTTPException(422, "Verification failed; check sample data and SQL") from None
 
     @app.get("/api/jobs/{job_id}/event-log")
     def event_log(job_id: str):
