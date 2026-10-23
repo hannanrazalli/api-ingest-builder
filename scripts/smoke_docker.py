@@ -50,6 +50,8 @@ body = urllib.request.urlopen(base + "/api/jobs/" + job["id"] + "/events").read(
 assert "event: agent" in body and "event: done" in body
 assert os.getuid() != 0
 assert shutil.which("node") is None
+assert shutil.which("codex") is None
+assert api("/api/providers/codex/status")["code"] == "cli_missing"
 assert importlib.util.find_spec("playwright") is None
 print("PASS: HTTP, static export, onboarding, key masking, Demo, SSE, non-root, no Node/Playwright")
 """

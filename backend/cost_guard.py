@@ -30,6 +30,25 @@ class CostGuard:
             self.job.input_tokens += input_tokens
             self.job.output_tokens += output_tokens
 
+    def reserve_codex(self, prompt_chars: int):
+        if prompt_chars < 0:
+            raise ValueError("Prompt reservations cannot be negative")
+        with self.lock:
+            if (
+                self.job.calls + 1 > self.settings.max_llm_calls
+                or self.job.prompt_chars + prompt_chars > self.settings.max_prompt_chars
+            ):
+                self.job.status = "waiting"
+                raise BudgetExceeded(
+                    "Codex call/character budget exceeded; explicit override required"
+                )
+            self.job.calls += 1
+            self.job.prompt_chars += prompt_chars
+            self.job.input_tokens = None
+            self.job.output_tokens = None
+            self.job.cached_tokens = None
+            self.job.cost_usd = None
+
     def reconcile(self, reserved_input: int, reserved_output: int, usage: Usage):
         with self.lock:
             self.job.input_tokens += usage.input_tokens - reserved_input

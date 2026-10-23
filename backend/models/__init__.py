@@ -1,7 +1,15 @@
 from datetime import UTC, datetime
 from typing import Any, Literal
 
-from pydantic import BaseModel, ConfigDict, Field, HttpUrl, SecretStr, model_validator
+from pydantic import (
+    BaseModel,
+    ConfigDict,
+    Field,
+    HttpUrl,
+    SecretStr,
+    field_validator,
+    model_validator,
+)
 
 
 class Model(BaseModel):
@@ -114,10 +122,10 @@ State = Literal["idle", "walking", "working", "waiting", "success", "error", "sl
 
 class Usage(Model):
     model: str
-    input_tokens: int = Field(default=0, ge=0)
-    output_tokens: int = Field(default=0, ge=0)
-    cached_tokens: int = Field(default=0, ge=0)
-    cost_usd: float = Field(default=0, ge=0, allow_inf_nan=False)
+    input_tokens: int | None = Field(default=0, ge=0)
+    output_tokens: int | None = Field(default=0, ge=0)
+    cached_tokens: int | None = Field(default=0, ge=0)
+    cost_usd: float | None = Field(default=0, ge=0, allow_inf_nan=False)
 
 
 class Event(Model):
@@ -132,11 +140,13 @@ class Event(Model):
 
 
 class Settings(Model):
-    provider: Literal["openai", "anthropic", "compatible"] = "openai"
+    provider: Literal["openai", "anthropic", "codex_cli"] = "openai"
     api_key: SecretStr = Field(default_factory=lambda: SecretStr(""))
     base_url: HttpUrl | None = None
     model_fast: str = ""
     model_smart: str = ""
+    max_prompt_chars: int = Field(default=80000, ge=0)
+    codex_timeout_seconds: float = Field(default=120, gt=0, le=600)
     max_llm_calls: int = Field(default=3, ge=0)
     max_input_tokens: int = Field(default=20000, ge=0)
     max_output_tokens: int = Field(default=4000, ge=0)
@@ -146,9 +156,15 @@ class Settings(Model):
     onboarded: bool = False
     demo_mode: bool = False
 
+    @field_validator("provider", mode="before")
+    @classmethod
+    def migrate_compatible(cls, value):
+        # Preserve existing local settings: compatible endpoints use OpenAI + base_url.
+        return "openai" if value == "compatible" else value
+
 
 class SettingsUpdate(Model):
-    provider: Literal["openai", "anthropic", "compatible"] | None = None
+    provider: Literal["openai", "anthropic", "codex_cli"] | None = None
     api_key: SecretStr | None = None
     base_url: HttpUrl | None = None
     model_fast: str | None = None
@@ -156,6 +172,8 @@ class SettingsUpdate(Model):
     input_usd_per_million: float | None = Field(default=None, ge=0, allow_inf_nan=False)
     cached_usd_per_million: float | None = Field(default=None, ge=0, allow_inf_nan=False)
     output_usd_per_million: float | None = Field(default=None, ge=0, allow_inf_nan=False)
+    max_prompt_chars: int | None = Field(default=None, ge=0)
+    codex_timeout_seconds: float | None = Field(default=None, gt=0, le=600)
     max_llm_calls: int | None = Field(default=None, ge=0)
     max_input_tokens: int | None = Field(default=None, ge=0)
     max_output_tokens: int | None = Field(default=None, ge=0)
@@ -166,7 +184,8 @@ class Job(Model):
     status: Literal["pending", "running", "waiting", "success", "error"] = "pending"
     created_at: datetime = Field(default_factory=lambda: datetime.now(UTC))
     calls: int = 0
-    input_tokens: int = 0
-    output_tokens: int = 0
-    cached_tokens: int = 0
-    cost_usd: float = 0
+    input_tokens: int | None = 0
+    output_tokens: int | None = 0
+    cached_tokens: int | None = 0
+    cost_usd: float | None = 0
+    prompt_chars: int = 0

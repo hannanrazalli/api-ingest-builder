@@ -4,7 +4,7 @@ dev:
 	uv sync --frozen
 	pnpm --dir frontend install --frozen-lockfile
 	pnpm --dir frontend build
-	uv run --no-env-file uvicorn backend.app.main:app --reload --host 127.0.0.1 --port 8000
+	uv run --no-env-file uvicorn backend.app.main:app --host 127.0.0.1 --port 8000
 
 test:
 	uv sync --frozen

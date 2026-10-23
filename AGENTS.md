@@ -2,7 +2,7 @@
 
 You are building **API Ingest Builder**: a portable, zero-setup web app for data engineers.
 Work in PHASES. After each phase: run tests, print a short summary (what was built, what is left, token/cost impact), then STOP and wait for the user to say "continue".
-Start with Phase 1 only.
+Work only on the phase explicitly authorized by the user.
 
 ---
 
@@ -25,15 +25,16 @@ Three tabs plus a live "Office" view:
    - BM25 retrieval over doc chunks; send only top-k chunks to the LLM.
    - Structured output (JSON schema), short outputs, prompt caching on the static system prompt and schema.
    - Tiered models: `MODEL_FAST` first, escalate to `MODEL_SMART` only on failure.
-   - Hard per-job budget enforced by the Cost Guard (section 4): `MAX_LLM_CALLS=3`, `MAX_INPUT_TOKENS=20000`, `MAX_OUTPUT_TOKENS=4000`, all overridable via settings.
+   - Hard per-job budget enforced by the Cost Guard (section 4), for API providers: `MAX_LLM_CALLS=3`, `MAX_INPUT_TOKENS=20000`, `MAX_OUTPUT_TOKENS=4000`, all overridable via settings. For `codex_cli`, enforce `MAX_LLM_CALLS` and aggregate `MAX_PROMPT_CHARS=80000` instead; token/cost values are unknown (`null`) and the UI says "uses Codex quota".
    - Changing params, toggles, chunk size, or output mode must NEVER trigger an LLM call.
    - The Office visualization costs zero tokens.
 3. **Zero setup.**
    - `git clone && docker compose up` is the only required step. No `.env` editing required.
-   - On first run the UI shows an onboarding screen: pick provider (Anthropic / OpenAI / any OpenAI-compatible base URL, which also allows free local models), paste API key, choose models. Store settings in the local SQLite DB (gitignored `data/`), never echo the key back (mask it), never log it.
+   - On first run the UI shows an onboarding screen: pick provider (`anthropic` / `openai` / `codex_cli`). OpenAI accepts a custom compatible base URL for local models. API providers use a key and configured models; "Use my local Codex (no API key)" checks `codex --version` and `codex login status`, with `codex login` instructions when needed. Store settings in the local SQLite DB (gitignored `data/`), never echo the key back (mask it), never log it.
    - Env vars (`LLM_PROVIDER`, `LLM_API_KEY`, `LLM_BASE_URL`, `MODEL_FAST`, `MODEL_SMART`) are optional overrides and take priority over the UI settings. Provide `.env.example`.
-   - **Demo mode** when no key is configured: the whole UI works against recorded fixtures (CoinGecko, Frankfurter, a sample SQL set), including the Office replay.
-   - Single container: FastAPI serves the Next.js static export (`output: "export"`). No Node runtime, Redis, Ollama, Colyseus, or external DB in production.
+   - **Demo mode** when an API provider has no key, or when explicitly selected: the whole UI works against recorded fixtures (CoinGecko, Frankfurter, a sample SQL set), including the Office replay.
+   - The `codex_cli` option instead runs the backend directly on the host (`scripts/dev.ps1`) using saved CLI ChatGPT authentication and quota; it is not a free unlimited API. Never read/copy `~/.codex/auth.json`, forward API-key environment overrides to the subprocess, or mount authentication into Docker by default.
+   - Single container for API/Demo modes: FastAPI serves the Next.js static export (`output: "export"`). No Node runtime, Redis, Ollama, Colyseus, or external DB in production.
    - Playwright (JS-rendered docs) is optional: install only under `docker compose --profile js`. The default image stays small. If Playwright is missing, the fetcher degrades gracefully and tells the user.
    - Also provide non-Docker paths: `make dev` (uses `uv` for backend, `pnpm` for frontend) and `make test`.
 4. **No hardcoded model names** anywhere. Read from settings/env. Show a hint in the UI to check the vendor docs for current model names.
@@ -49,7 +50,7 @@ Three tabs plus a live "Office" view:
 
 ## 3. Stack
 
-- **Backend**: Python 3.12, FastAPI, httpx, Pydantic v2, SQLite (sqlite3 or SQLModel), Jinja2, rank_bm25, selectolax + markdownify, sqlglot, duckdb (verification only), pytest, ruff. Streaming via SSE.
+- **Backend**: Python 3.12, jsonschema, optional host-installed Codex CLI via async subprocess, FastAPI, httpx, Pydantic v2, SQLite (sqlite3 or SQLModel), Jinja2, rank_bm25, selectolax + markdownify, sqlglot, duckdb (verification only), pytest, ruff. Streaming via SSE.
 - **Frontend**: Next.js (App Router, static export), TypeScript, Tailwind, shadcn/ui, Framer Motion, Monaco editor, Canvas 2D for the Office (no Phaser, no game engine).
 - **Packaging**: multi-stage Dockerfile, `docker-compose.yml` (one service, one volume for `data/`), Makefile (`dev`, `test`, `lint`, `build`).
 
@@ -85,12 +86,14 @@ api-ingest-builder/
 
 ## 4. Subagents (modules in backend/agents/)
 
+LLM provider selection is `anthropic | openai | codex_cli`; compatible endpoints use OpenAI plus base URL. `codex_cli` executes only the same authorized LLM steps, never the orchestrator or deterministic modules. Runs serialize across backend processes sharing the data directory, with queue/request timeouts, read-only ephemeral sessions, an empty working directory, bounded output, schema validation, disabled optional tool integrations, and no workspace/file attachments. Only prompt data and the required temporary schema/output paths are supplied. CLI/model/provider failures must have short secret-free errors; never retry automatically.
+
 Every subagent MUST emit events (section 7) at start, progress, end, and on error. The orchestrator is deterministic code, not an LLM.
 
 | # | Subagent | Job | LLM? | Model tier |
 |---|---|---|---|---|
 | 0 | **Orchestrator** | Runs the pipeline as a state machine, checks cache first, routes failures to Repair, emits events, enforces Cost Guard | No | - |
-| 0b | **Cost Guard** | Tracks calls/tokens/cost per job, blocks calls that would exceed budget, asks the user to approve an override in the UI | No | - |
+| 0b | **Cost Guard** | Tracks calls/tokens/cost per API job (calls/prompt characters for Codex quota jobs), blocks calls that would exceed budget, asks the user to approve an override in the UI | No | - |
 | 1 | **Prober** | Try `/openapi.json`, `/swagger.json`, `/openapi.yaml`, `/docs`, `/api-docs`, `/developers`, sitemap.xml, robots.txt, homepage links containing api/developer/docs. If an OpenAPI/Swagger spec is found, parse it directly and SKIP the LLM extractor for the parts it covers | No | - |
 | 2 | **Fetcher** | Fetch docs pages, convert to clean markdown, strip nav/footer, dedupe, Playwright fallback if available. Respect robots.txt and rate-limit politely | No | - |
 | 3 | **Retriever** | Chunk markdown, BM25 rank against fixed queries (authentication, api key header, endpoints, parameters, date range, pagination, rate limit), return top-k chunks with source URLs | No | - |
@@ -162,7 +165,7 @@ Define once as a Pydantic model and a matching TypeScript type. All subagents em
 }
 ```
 
-`llm` is null for non-LLM steps. Never put secrets or full document bodies in events.
+`llm` is null for non-LLM steps. Its input/output/cached token counts and cost_usd are numbers or null; use null for unknown Codex CLI usage (not zero dollars). Never put secrets or full document bodies in events.
 
 ---
 
@@ -234,6 +237,8 @@ Modern, minimal, dark by default (light theme available), inspired by Linear / V
 
 **Phase 1: Foundation.** Repo scaffold, Dockerfile (single container, static frontend), docker-compose, Makefile, `.env.example`, Pydantic models (Spec, Event, Settings, Job), settings storage + first-run onboarding API, LLM provider abstraction with prompt-cache support, SQLite cache layer, SSRF guard, Cost Guard, event bus + SSE, tests. Create this file's summary as the first commit note.
 
+**Phase 1b: Local Codex provider.** Add `codex_cli` without API keys, host onboarding/login checks, read-only ephemeral schema-constrained subprocesses, serialization/timeouts, calls/character Cost Guard, nullable usage and quota label. Keep Demo/deterministic behavior unchanged. Tests use a fake executable on PATH only; no real Codex calls or auth-file reads.
+
 **Phase 2: Research pipeline.** Prober (with OpenAPI parsing), Fetcher, Retriever, Extractor, Verifier, Profiler, Repair, Orchestrator. Tests use a mocked LLM and recorded fixtures (CoinGecko, Frankfurter). Assert: OpenAPI path = 0 LLM calls, cache hit = 0 calls, normal path = at most 1 call, repair path = at most 3.
 
 **Phase 3: Generator.** All Jinja2 templates + golden-file tests + ruff/py_compile checks.
@@ -255,7 +260,7 @@ Modern, minimal, dark by default (light theme available), inspired by Linear / V
 - Office replays a full job from events with no extra LLM usage.
 - `make test` and `make lint` pass.
 
-Start with **Phase 1 only**, then stop.
+Stop after the currently authorized phase. Do not resume Phase 2 after Phase 1b until the user explicitly says continue.
 
 ## Windows development and secret hygiene
 

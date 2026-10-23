@@ -2,7 +2,7 @@
 
 Portable data engineering tools with deterministic processing, SQLite caching, and budgeted LLM use.
 
-**Phase 1 is implemented.** This release provides onboarding, provider/settings APIs, typed spec/job/event contracts, caches, Cost Guard, protected fetch infrastructure and persistent SSE. Research, recorded API demos, generation, conversion, explanations and the Office visualization arrive in Phases 2–6. The foundation makes no LLM calls on startup or when changing settings.
+**Phase 1 and Phase 1b are implemented.** This release provides onboarding, provider/settings APIs, typed spec/job/event contracts, caches, Cost Guard, protected fetch infrastructure and persistent SSE. Research, recorded API demos, generation, conversion, explanations and the Office visualization arrive in Phases 2–6. The foundation makes no LLM calls on startup or when changing settings.
 
 ## Quickstart (PowerShell or a POSIX shell)
 
@@ -14,9 +14,9 @@ docker compose up --build
 
 Open [localhost:8000](http://localhost:8000). No `.env` is needed. Select Demo mode or enter provider settings locally. FastAPI serves the Next.js static export in one container; only SQLite data persists in the `app-data` volume. Stop with `docker compose down`; the volume remains.
 
-Choose Anthropic, OpenAI, or an OpenAI-compatible base URL (include `/v1` where appropriate). Enter model names from the vendor's current documentation; none are hardcoded. Local compatible servers can use a non-secret placeholder key if they do not require authentication. Provider endpoints are trusted administrator configuration and can intentionally address local model servers. Research URLs must use the separate SSRF-protected fetcher.
+Choose Anthropic, OpenAI (including compatible endpoints via a custom base URL), or local Codex CLI. Include `/v1` in API base URLs where appropriate. Enter model names from the vendor's current documentation; none are hardcoded. Local compatible servers can use a non-secret placeholder key if they do not require authentication. Provider endpoints are trusted administrator configuration and can intentionally address local model servers. Research URLs must use the separate SSRF-protected fetcher.
 
-Optional nonempty environment overrides take precedence over stored UI settings: `LLM_PROVIDER`, `LLM_API_KEY`, `LLM_BASE_URL`, `MODEL_FAST`, `MODEL_SMART`. `.env.example` documents these variables. Compose can use a user-maintained local `.env`; do not commit it or share its contents. The agent and development scripts must never read or print that file. Settings responses contain only a fixed key mask. Actual credentials are stored locally in SQLite so requests can authenticate; protect the local data directory/volume. This is a local single-user app, bound to loopback by default.
+Optional nonempty environment overrides take precedence over stored UI settings: `LLM_PROVIDER`, `LLM_API_KEY`, `LLM_BASE_URL`, `MODEL_FAST`, `MODEL_SMART`, `MAX_PROMPT_CHARS`, `CODEX_TIMEOUT_SECONDS`. `.env.example` documents these variables. Compose can use a user-maintained local `.env`; do not commit it or share its contents. The agent and development scripts must never read or print that file. Settings responses contain only a fixed key mask. Actual credentials are stored locally in SQLite so requests can authenticate; protect the local data directory/volume. This is a local single-user app, bound to loopback by default.
 
 ## Development on Windows
 
@@ -29,7 +29,7 @@ Install Python 3.12, uv, Node.js 22 and pnpm. From PowerShell:
 .\scripts\build.ps1
 ```
 
-`dev.ps1` installs dependencies, exports the frontend, then runs the backend with reload on [localhost:8000](http://localhost:8000). Rerun after frontend changes to regenerate the export. No Node process runs in production. The scripts stop on failed commands and return to the starting directory.
+`dev.ps1` installs dependencies, exports the frontend, then runs the backend on [localhost:8000](http://localhost:8000). Rerun after frontend changes to regenerate the export. Restart after backend changes; development runs a single process without reload so Windows uses the subprocess-capable Proactor event loop. No Node process runs in production. The scripts stop on failed commands and return to the starting directory.
 
 Equivalent Make targets for POSIX environments:
 
@@ -41,6 +41,30 @@ make build
 ```
 
 Python dependencies are locked in `uv.lock`; frontend dependencies in `frontend/pnpm-lock.yaml`. Test/lint scripts check the backend and TypeScript. Build commands explicitly use the non-secret `.env.example`; only user-invoked runtime Compose commands load local overrides. `uv run --no-env-file` prevents accidental dotenv loading. The reference file is preserved verbatim and excluded from application linting; its default URL is a Markdown link from the supplied text, so future generation must use validated spec URLs instead.
+
+## Local Codex login (host only)
+
+Select **Use my local Codex (no API key)** in onboarding. Install the official Codex CLI on the host, then run these commands yourself:
+
+```powershell
+codex --version
+codex login
+.\scripts\dev.ps1
+```
+
+The onboarding status check runs only `--version` and `login status`, never inference. Choose ChatGPT login: API-key-based CLI login is rejected for this quota mode. A valid login uses your available Codex quota; it does not imply unlimited or free usage. Model fields are optional; empty values use the CLI's built-in default. OpenAI-compatible/local servers remain available through provider `openai` with a custom base URL. Legacy stored `compatible` settings migrate to `openai`.
+
+`LLM_PROVIDER=codex_cli` can also be set in the host process environment. Existing nonempty environment overrides still take priority over UI selection; clear an `LLM_PROVIDER` override yourself if necessary. The app never loads `.env` directly. The CLI manages its saved authentication; the application never opens or copies its authentication files. API-key overrides are excluded from the subprocess environment.
+
+This mode is for the backend running directly on the host. The Docker image contains no Codex CLI and no authentication mounts. Selecting it inside Docker reports that the CLI is missing. Use API/Demo mode in Docker.
+
+The provider passes prompt text via stdin from an empty temporary working directory. `codex exec` uses `--output-schema`, `-o`, `--sandbox read-only`, `--ephemeral`, `--skip-git-repo-check`, `--ignore-rules` and `--ignore-user-config`; configured model values use `--model`. User configuration is ignored while CLI authentication remains available. Shell, app, multi-agent, hook, memory, local-image and web-search features are disabled through documented configuration overrides; project instruction loading is disabled. No repository content, extra files, images or tools are attached. Temporary schema/output files are removed, and diagnostics are bounded and never returned verbatim.
+
+Flags and authentication behavior were checked against [non-interactive mode](https://developers.openai.com/codex/noninteractive), the [CLI reference](https://developers.openai.com/codex/cli/reference) and [configuration reference](https://developers.openai.com/codex/config-reference). CLI versions lacking these options fail with an update instruction; the app never falls back to broader access.
+
+Calls serialize using an OS lock in the local data directory, including across backend processes sharing that directory. The default queue/request timeout is 120 seconds (`CODEX_TIMEOUT_SECONDS`, UI/settings API field `codex_timeout_seconds`, maximum 600). Timeout/cancellation terminates the subprocess tree. `MAX_LLM_CALLS` remains strict; `MAX_PROMPT_CHARS` limits total submitted prompt characters per job (default 80,000, including policy/delimiters and output schema). Failed attempts retain reservations. Token/cost values are `null` for unknown CLI usage; the meter says **uses Codex quota**. Cached results incur zero CLI calls. API providers retain token/dollar accounting.
+
+Tests install a fake Codex executable on PATH; they never invoke the real CLI or inspect its login files. They cover output schema rejection, missing/login/quota errors, timeouts, serialized calls, cache hits, and call/character budgets.
 
 ## Optional JavaScript documentation support
 
@@ -55,6 +79,7 @@ The normal image has neither. The overlay configuration is validated in Phase 1;
 ## Foundation APIs
 
 - `GET /api/health`: status and current phase.
+- `GET /api/providers/codex/status`: host CLI availability, safe version string and login status (no model call).
 - `GET /api/settings`: effective settings, key mask, Demo state, override field names.
 - `PUT /api/settings`: partial local update; omit the key to retain it, send an empty key to clear it.
 - `POST /api/onboarding/demo`: select Demo mode, retaining any stored key while disabling live calls. Saving provider settings leaves explicit Demo mode.
@@ -76,7 +101,7 @@ Run `python scripts/smoke_docker.py` after the Docker build for a disposable pro
 
 ## Phase plan
 
-1. Foundation (current).
+1. Foundation, including Phase 1b local Codex support (current).
 2. Research pipeline and recorded fixtures.
 3. Deterministic Jinja2 code generation.
 4. Builder UI and live timeline.

@@ -9,6 +9,8 @@ ENV_FIELDS = {
     "LLM_BASE_URL": "base_url",
     "MODEL_FAST": "model_fast",
     "MODEL_SMART": "model_smart",
+    "MAX_PROMPT_CHARS": "max_prompt_chars",
+    "CODEX_TIMEOUT_SECONDS": "codex_timeout_seconds",
     "MAX_LLM_CALLS": "max_llm_calls",
     "MAX_INPUT_TOKENS": "max_input_tokens",
     "MAX_OUTPUT_TOKENS": "max_output_tokens",
@@ -27,6 +29,11 @@ def public_settings(settings: Settings) -> dict:
     value = settings.model_dump(mode="json", exclude={"api_key"})
     value["api_key_masked"] = "********" if settings.api_key.get_secret_value() else ""
     value["has_api_key"] = bool(settings.api_key.get_secret_value())
-    value["demo_mode"] = settings.demo_mode or not value["has_api_key"]
+    value["demo_mode"] = settings.demo_mode or (
+        settings.provider != "codex_cli" and not value["has_api_key"]
+    )
+    value["usage_label"] = (
+        "uses Codex quota" if settings.provider == "codex_cli" else "API usage (USD)"
+    )
     value["env_overrides"] = [field for env, field in ENV_FIELDS.items() if os.environ.get(env)]
     return value

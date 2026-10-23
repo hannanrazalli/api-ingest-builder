@@ -6,6 +6,8 @@ from pydantic import BaseModel
 
 from backend.cache.store import Store, cache_key
 from backend.cost_guard import CostGuard
+from backend.llm.codex_cli import CodexCLI, build_prompt
+from backend.llm.errors import CodexCLIError, ProviderError
 from backend.models import Event, Settings, Usage
 from backend.orchestrator.events import EventBus
 
@@ -28,10 +30,6 @@ def strict_schema(value):
 
 
 Purpose = Literal["extractor", "repair", "converter", "explainer"]
-
-
-class ProviderError(RuntimeError):
-    pass
 
 
 class Provider:
@@ -80,6 +78,36 @@ class Provider:
         if cached is not None:
             emit("success", "Loaded cached response", cache_hit=True)
             return result_type.model_validate(cached)
+        if self.settings.provider == "codex_cli" and not self.settings.demo_mode:
+            prompt = build_prompt(text)
+            try:
+                self.guard.reserve_codex(len(prompt) + len(json.dumps(schema)))
+            except RuntimeError:
+                self.store.save_job(job)
+                emit("waiting", "Cost Guard blocked Codex call or prompt character budget")
+                raise
+            self.store.save_job(job)
+            emit("working", "Requesting local Codex; uses Codex quota")
+            try:
+                cli = CodexCLI(
+                    self.store.path.parent / "codex-cli.lock", self.settings.codex_timeout_seconds
+                )
+                result = await cli.structured(prompt, schema, result_type, model)
+                self.store.put(cache, key, result.model_dump(mode="json"))
+                usage = Usage(
+                    model=model or "local-default",
+                    input_tokens=None,
+                    output_tokens=None,
+                    cached_tokens=None,
+                    cost_usd=None,
+                )
+                emit(
+                    "success", "Codex JSON validated; uses Codex quota", llm=usage, cache_hit=False
+                )
+                return result
+            except CodexCLIError as exc:
+                emit("error", str(exc))
+                raise
         if self.settings.demo_mode or not model or not self.settings.api_key.get_secret_value():
             emit("error", "Configure a provider key and model, or use Demo mode")
             raise ProviderError("Provider key and model are required")
@@ -124,9 +152,7 @@ class Provider:
             payload = {
                 "model": model,
                 (
-                    "max_tokens"
-                    if self.settings.provider == "compatible"
-                    else "max_completion_tokens"
+                    "max_tokens" if self.settings.base_url is not None else "max_completion_tokens"
                 ): max_output,
                 "messages": [
                     {"role": "system", "content": SYSTEM},

@@ -8,6 +8,7 @@ from fastapi.staticfiles import StaticFiles
 from pydantic import ValidationError
 
 from backend.cache.store import Store
+from backend.llm.codex_cli import CodexCLI
 from backend.models import Event, Job, Settings, SettingsUpdate
 from backend.orchestrator.events import EventBus
 from backend.settings import effective_settings, public_settings
@@ -46,6 +47,13 @@ def create_app(db_path=None, static_dir=None):
     @app.get("/api/health")
     def health():
         return {"status": "ok", "phase": 1}
+
+    @app.get("/api/providers/codex/status")
+    async def codex_status():
+        settings = effective_settings(store)
+        return await CodexCLI(
+            store.path.parent / "codex-cli.lock", settings.codex_timeout_seconds
+        ).status()
 
     @app.get("/api/settings")
     def settings():

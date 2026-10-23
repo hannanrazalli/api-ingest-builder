@@ -164,7 +164,7 @@ class Result(BaseModel):
     summary: str
 
 
-@pytest.mark.parametrize("provider", ["openai", "anthropic", "compatible"])
+@pytest.mark.parametrize("provider", ["openai", "anthropic"])
 def test_provider_structured_cache_and_usage(store, provider):
     settings = Settings(
         provider=provider,
