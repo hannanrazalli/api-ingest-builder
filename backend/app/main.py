@@ -6,13 +6,13 @@ from uuid import uuid4
 from fastapi import FastAPI, HTTPException, Query, Request
 from fastapi.responses import JSONResponse, StreamingResponse
 from fastapi.staticfiles import StaticFiles
-from pydantic import ValidationError
+from pydantic import Field, SecretStr, ValidationError
 
 from backend.agents.base import AgentContext
-from backend.agents.generator import Generator
+from backend.agents.generator import Generator, sample_preview
 from backend.cache.store import Store
 from backend.llm.codex_cli import CodexCLI
-from backend.models import Event, Job, Settings, SettingsUpdate, Spec
+from backend.models import Event, Job, Model, Settings, SettingsUpdate, Spec
 from backend.models.generation import GenerateRequest
 from backend.models.research import Profile, ResearchRequest
 from backend.orchestrator.events import EventBus
@@ -101,6 +101,15 @@ def create_app(db_path=None, static_dir=None):
         )
         return job
 
+    class APICredential(Model):
+        host: str = Field(pattern=r"^[a-zA-Z0-9.-]+$", max_length=253)
+        api_key: SecretStr
+
+    @app.put("/api/api-credentials")
+    def save_credential(value: APICredential):
+        store.credential(value.host.lower(), value.api_key.get_secret_value())
+        return {"host": value.host.lower(), "has_key": bool(value.api_key.get_secret_value())}
+
     @app.get("/api/jobs")
     def job_history():
         return [
@@ -151,6 +160,9 @@ def create_app(db_path=None, static_dir=None):
             "code": code,
             "filename": spec.name + ".py",
             "sample": sample,
+            "flattened_sample": sample_preview(sample, endpoint.record_path)
+            if sample is not None and (request.flatten or request.mode == "ndjson")
+            else None,
             "events": [event.model_dump(mode="json") for _, event in store.events(request.job_id)],
         }
 

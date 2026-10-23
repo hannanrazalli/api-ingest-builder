@@ -31,6 +31,9 @@ class Store:
                 "CREATE TABLE IF NOT EXISTS research_index (key TEXT PRIMARY KEY, value TEXT)"
             )
             db.execute("CREATE TABLE IF NOT EXISTS results (job_id TEXT PRIMARY KEY, value TEXT)")
+            db.execute(
+                "CREATE TABLE IF NOT EXISTS api_credentials (host TEXT PRIMARY KEY, value TEXT)"
+            )
         try:
             self.path.chmod(0o600)
         except OSError:
@@ -114,3 +117,10 @@ class Store:
         with self.connect() as db:
             rows = db.execute("SELECT value FROM jobs ORDER BY rowid DESC LIMIT 50").fetchall()
         return [Job.model_validate_json(row[0]) for row in rows]
+
+    def credential(self, host, key=None):
+        with self.connect() as db:
+            if key is not None:
+                db.execute("INSERT OR REPLACE INTO api_credentials VALUES (?, ?)", (host, key))
+            row = db.execute("SELECT value FROM api_credentials WHERE host=?", (host,)).fetchone()
+        return row[0] if row else None

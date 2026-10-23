@@ -249,3 +249,19 @@ def test_wire_schema_preserves_default_field_and_removes_only_annotations():
     param = schema["$defs"]["WireParam"]
     assert "default" in param["properties"] and "default" in param["required"]
     assert "default" not in param["properties"]["default"]
+
+
+def test_saved_target_key_is_masked_and_host_bound(tmp_path):
+    from fastapi.testclient import TestClient
+
+    from backend.app.main import create_app
+
+    app = create_app(tmp_path / "credential.sqlite3")
+    with TestClient(app) as client:
+        response = client.put(
+            "/api/api-credentials",
+            json={"host": "api.coingecko.com", "api_key": "fixture-target-key"},
+        )
+        assert response.status_code == 200 and "fixture-target-key" not in response.text
+        assert app.state.store.credential("api.coingecko.com") == "fixture-target-key"
+        assert app.state.store.credential("other.example") is None

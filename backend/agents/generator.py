@@ -1,5 +1,6 @@
 import ast
 import io
+import json
 import pprint
 import subprocess
 import sys
@@ -50,6 +51,35 @@ def format_code(code):
         code = result.stdout
     ast.parse(code)
     return code
+
+
+def sample_preview(sample, record_path):
+    """Match generated dotted-key flattening on a small recorded sample."""
+    records = sample
+    if record_path:
+        for part in record_path.split("."):
+            if isinstance(records, dict):
+                records = records.get(part)
+            elif isinstance(records, list) and part.isdigit():
+                index = int(part)
+                records = records[index] if index < len(records) else None
+            else:
+                return None
+    records = records if isinstance(records, list) else [records]
+
+    def flatten(value, prefix="", output=None):
+        output = {} if output is None else output
+        if isinstance(value, dict):
+            for key, item in value.items():
+                flatten(item, f"{prefix}.{key}" if prefix else str(key), output)
+        elif isinstance(value, list):
+            for index, item in enumerate(value):
+                flatten(item, f"{prefix}.{index}" if prefix else str(index), output)
+        else:
+            output[prefix or "value"] = value
+        return output
+
+    return "\n".join(json.dumps(flatten(row), ensure_ascii=False) for row in records[:3])
 
 
 class Generator:

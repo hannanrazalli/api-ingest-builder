@@ -1,4 +1,5 @@
 import asyncio
+import json
 import subprocess
 import sys
 from pathlib import Path
@@ -162,3 +163,12 @@ def test_inclusive_chunk_windows_and_offset_host_protection(store, monkeypatch):
     ]
     with pytest.raises(ValueError, match="host"):
         namespace["_get"]("https://other.example/steal", {}, {})
+
+
+def test_sample_preview_is_bounded_and_matches_dotted_flattening():
+    from backend.agents.generator import sample_preview
+
+    rows = [{"nested": {"a": 1}, "values": [2, 3]}] * 5
+    preview = sample_preview({"data": rows}, "data")
+    assert len(preview.splitlines()) == 3
+    assert json.loads(preview.splitlines()[0]) == {"nested.a": 1, "values.0": 2, "values.1": 3}

@@ -63,5 +63,6 @@ class ResearchResult(Model):
     spec: Spec | None = None
     profile: Profile | None = None
     warnings: list[str] = Field(default_factory=list)
+    saved_tokens: int | None = 0
     cache_hit: bool = False
     demo: bool = False

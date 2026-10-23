@@ -132,6 +132,13 @@ class ResearchPipeline:
                                     ctx, provider, chunks, digest, demo_spec
                                 )
                     if spec:
+                        if not key and not demo and spec.auth.required:
+                            host = urlsplit(str(spec.base_url)).hostname
+                            key = self.store.credential(host)
+                            if key:
+                                request.api_key_host = host
+                                bus.secrets = [*bus.secrets, key]
+                                register_secrets(key)
                         if spec.auth.type == "unsupported":
                             status = "unsupported"
                             warnings.append(
@@ -191,7 +198,14 @@ class ResearchPipeline:
                             domain, spec.content_hash, "demo" if demo else "live"
                         )
                         self.store.put(
-                            "spec_cache", stored_key, {"spec": spec.model_dump(mode="json")}
+                            "spec_cache",
+                            stored_key,
+                            {
+                                "spec": spec.model_dump(mode="json"),
+                                "usage": cached.get("usage", {})
+                                if hit
+                                else job.model_dump(mode="json"),
+                            },
                         )
                         self.store.index(index_key, stored_key)
                     progress(
@@ -222,6 +236,7 @@ class ResearchPipeline:
             spec=spec,
             profile=profile,
             warnings=list(dict.fromkeys(warnings)),
+            saved_tokens=cached.get("usage", {}).get("input_tokens", 0) if hit else 0,
             cache_hit=hit,
             demo=demo,
         )
