@@ -189,3 +189,6 @@ class Job(Model):
     cached_tokens: int | None = 0
     cost_usd: float | None = 0
     prompt_chars: int = 0
+    budget_ready: bool = False
+    budget_limits: dict[str, int] = Field(default_factory=dict)
+    budget_required: dict[str, int] = Field(default_factory=dict)

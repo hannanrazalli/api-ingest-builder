@@ -17,9 +17,11 @@ from backend.settings import effective_settings
 
 
 class Converter:
-    async def run(self, store, request, provider_factory=Provider):
+    async def run(self, store, request, provider_factory=Provider, *, job=None):
         settings = effective_settings(store)
-        job = Job(id=str(uuid4()), status="running")
+        job = job or Job(id=str(uuid4()))
+        job.status = "running"
+        store.save_pending(job.id, "convert", request)
         store.save_job(job)
         ctx = AgentContext(store, job, EventBus(store, [settings.api_key.get_secret_value()]))
         key = "result:" + cache_key(request.sql, request.dialect, request.target)
@@ -41,6 +43,7 @@ class Converter:
                     plan(node)
                 except Unsupported as error:
                     if not request.allow_llm:
+                        job.status = "success"
                         return {
                             "job": job.model_dump(mode="json"),
                             "status": "unsupported",
@@ -105,4 +108,5 @@ class Converter:
         finally:
             if job.status == "running":
                 job.status = "error"
+            job.budget_ready = job.status == "waiting"
             store.save_job(job)

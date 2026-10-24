@@ -29,9 +29,11 @@ def detect_language(text):
 
 
 class Explainer:
-    async def run(self, store, request, provider_factory=Provider):
+    async def run(self, store, request, provider_factory=Provider, *, job=None):
         settings = effective_settings(store)
-        job = Job(id=str(uuid4()), status="running")
+        job = job or Job(id=str(uuid4()))
+        job.status = "running"
+        store.save_pending(job.id, "explain", request)
         store.save_job(job)
         ctx = AgentContext(store, job, EventBus(store, [settings.api_key.get_secret_value()]))
         key = "result:" + cache_key(request.text, request.language, request.detail)
@@ -96,4 +98,5 @@ class Explainer:
         finally:
             if job.status == "running":
                 job.status = "error"
+            job.budget_ready = job.status == "waiting"
             store.save_job(job)

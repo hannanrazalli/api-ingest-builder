@@ -2,7 +2,11 @@
 
 Portable data engineering tools with deterministic processing, SQLite caching, and budgeted LLM use.
 
-**Phases 1, 1b and 2 are implemented.** This release provides onboarding, provider/settings APIs, typed spec/job/event contracts, caches, Cost Guard, protected fetch infrastructure and persistent SSE. Research, recorded API demos, generation, conversion, explanations and the Office visualization arrive in Phases 2–6. The foundation makes no LLM calls on startup or when changing settings.
+**Phases 1–7 are implemented.** Research source-backed API specs, generate Python ingestion scripts, convert SQL to PySpark/pandas, explain code in Malay or English, and watch actual job events in the pixel-art Office. Demo runs offline without credentials. Generation, supported SQL conversion, visualization and cache hits use zero LLM calls.
+
+![Builder workspace](docs/screenshots/builder-desktop.png)
+
+![Live agent Office](docs/screenshots/office-desktop.png)
 
 ## Quickstart (PowerShell or a POSIX shell)
 
@@ -74,24 +78,24 @@ Only the explicit JS profile overlay installs Playwright and Chromium, into the 
 docker compose -f docker-compose.yml -f docker-compose.js.yml --profile js up --build
 ```
 
-The normal image has neither. The overlay configuration is validated in Phase 1; the optional browser image will receive integration coverage with the Phase 2 fetcher. The fetcher pipeline and its graceful missing-Playwright message are Phase 2 work.
+The normal image has neither. The fetcher reports a clear fallback message when Playwright is absent. The optional JS image is separate from the default image; its browser renderer is covered with mocked assets rather than live sites.
 
-## Foundation APIs
+## Local APIs
 
 - `GET /api/health`: status and current phase.
 - `GET /api/providers/codex/status`: host CLI availability, safe version string and login status (no model call).
 - `GET /api/settings`: effective settings, key mask, Demo state, override field names.
 - `PUT /api/settings`: partial local update; omit the key to retain it, send an empty key to clear it.
 - `POST /api/onboarding/demo`: select Demo mode, retaining any stored key while disabling live calls. Saving provider settings leaves explicit Demo mode.
-- `POST /api/jobs`: create a foundation job with its initial dispatcher event.
+- `POST /api/jobs`: create an idle job with its initial dispatcher event.
 - `GET /api/jobs/{id}`: persisted status and usage.
-- `GET /api/jobs/{id}/events`: SSE with durable sequence IDs; reconnect with `Last-Event-ID` or `?after=`. Terminal jobs send `done` after replay.
+- `GET /api/jobs/{id}/events`: SSE with durable sequence IDs; reconnect with `Last-Event-ID` or `?after=`. Completed, failed and fully persisted budget-blocked jobs send `done` after replay.
 
 The frontend event type is generated from the Pydantic contract using `uv run --no-env-file python scripts/export_event_type.py`; its parity is tested. Agent events include only short metadata, never document bodies. All event publishers must use `EventBus` with the current job's secrets for redaction.
 
 Cache namespaces are `spec_cache`, `convert_cache`, `explain_cache`, `sample_cache`; job/events/settings are also persisted in SQLite with parameterized queries and WAL. Structured LLM responses have their own prefixed content keys including provider, model, endpoint, prompt, schema and input. Unchanged input can return a validated cached result with zero calls.
 
-Cost Guard reserves a conservative UTF-8 byte token bound plus overhead before network I/O, reserves the full requested output, then reconciles reported usage. Default per-job limits: 3 calls, 20,000 input tokens and 4,000 output tokens. Failures retain reservations. Calls are never automatically retried; routing and model escalation belong to the later deterministic pipeline. A blocked call persists a waiting job/event; user override UI is Phase 7. Prices default to zero (unconfigured), not a claim that a paid provider is free; configure `input_usd_per_million`, `cached_usd_per_million` and `output_usd_per_million` through the settings API for estimates. Provider pricing/cache-write premiums vary; cost is an estimate. Cached token counts come from provider usage. Anthropic uses cached static system/tool blocks; OpenAI uses a stable prefix for automatic caching. Cache support depends on the configured provider/model.
+Cost Guard reserves a conservative UTF-8 byte token bound plus overhead before network I/O, reserves the full requested output, then reconciles reported usage. Default per-job limits: 3 calls, 20,000 input tokens and 4,000 output tokens. Failures retain reservations. Provider calls are never automatically retried; repair routing and model escalation are controlled by the deterministic research pipeline. A blocked call persists a waiting job/event and opens a job-only budget review (see below). Prices default to zero (unconfigured), not a claim that a paid provider is free; configure `input_usd_per_million`, `cached_usd_per_million` and `output_usd_per_million` through the settings API for estimates. Provider pricing/cache-write premiums vary; cost is an estimate. Cached token counts come from provider usage. Anthropic uses cached static system/tool blocks; OpenAI uses a stable prefix for automatic caching. Cache support depends on the configured provider/model.
 
 `SafeFetcher` only issues GET requests, resolves and validates every redirect, rejects any mixed private/public DNS answer, pins the actual connection to the validated address while retaining TLS SNI/Host, limits total time, redirects and response bytes, and rejects compressed bodies to avoid decompression bombs. Explicit credential headers require a matching spec hostname and cannot cross hosts. Provider requests disable redirects to prevent key forwarding. No fetched instructions are executed: retrieved inputs enter LLM requests as JSON data beneath a fixed untrusted-data system policy.
 
@@ -101,7 +105,7 @@ Run `python scripts/smoke_docker.py` after the Docker build for a disposable pro
 
 ## Phase plan
 
-1. Foundation, including Phase 1b local Codex support (current).
+1. Foundation, including Phase 1b local Codex support.
 2. Research pipeline and recorded fixtures.
 3. Deterministic Jinja2 code generation.
 4. Builder UI and live timeline.
@@ -109,7 +113,7 @@ Run `python scripts/smoke_docker.py` after the Docker build for a disposable pro
 6. Event-driven Office.
 7. Polish, accessibility and clean-machine verification.
 
-Development stops after each phase pending `continue`. No Office code or third-party sprites have been copied.
+All seven planned phases are present. No Office code or third-party sprites have been copied. See [release verification](docs/verification.md) for the checks and remaining runtime limitations.
 
 
 ## Research pipeline (Phase 2)
@@ -134,7 +138,7 @@ Retries handle transient failures, exponential backoff and Retry-After; every pa
 
 The responsive three-panel Builder runs research through SSE, shows source-linked endpoints and badges, edits documented parameters/date windows, and renders Python in a locally bundled Monaco editor. Copy/download and every mode/toggle use zero LLM calls. Nested recorded samples show before/after NDJSON. The footer reports calls, tokens, estimated cost (or Codex quota) and cached tokens saved. History restores earlier jobs; Ctrl/Cmd+K switches views/projects, theme and re-research. API credentials are saved locally against the exact target hostname and never returned in full; they are separate from provider credentials.
 
-Onboarding includes Demo, API providers and host-only Codex instructions. Dark/light themes, keyboard tab navigation, visible focus and reduced motion are supported. Converter/Explain/Office screens are placeholders until their respective phases. Browser tests exercise Demo end to end, download, cache, command palette, local Monaco without external requests, and desktop/tablet onboarding. Screenshots are in `docs/screenshots/`. Production builds use the documented Next.js Webpack fallback because Turbopack child processes fail on this host runtime; static export and the single-container architecture are unchanged. See [Next.js build options](https://nextjs.org/docs/app/api-reference/turbopack).
+Onboarding includes Demo, API providers and host-only Codex instructions. Dark/light themes, keyboard tab navigation, visible focus and reduced motion are supported. Browser tests exercise Demo end to end, download, cache, command palette, local Monaco without external requests, and desktop/tablet onboarding. Screenshots are in `docs/screenshots/`. Production builds use the documented Next.js Webpack fallback because Turbopack child processes fail on this host runtime; static export and the single-container architecture are unchanged. See [Next.js build options](https://nextjs.org/docs/app/api-reference/turbopack).
 
 
 ## Converter and Explain (Phase 5)
@@ -152,4 +156,15 @@ Explain detects SQL/Python/PySpark locally and makes one schema-constrained call
 
 Office is a Canvas 2D view of persisted backend events, with no extra LLM calls or services. Eleven rooms/roles use a cohesive procedural 16-color palette; desks, props, sprites, emotes and printer pages are code-generated. An A* walkable grid routes characters around furniture. The mechanic walks via the workshop to QA on repair events; cached Prober events return an archived file. Reported token counters animate only up to actual event usage, and unknown Codex usage stays unknown. Select a character or accessible room button to follow its camera and inspect task/timings/usage, filter the deduplicated log, zoom, pause movement or enable mini mode across tabs. Reduced motion honors the OS preference and a local toggle. The logical canvas uses integer pixels and 2x camera zoom; mini mode uses half-size pixels, with pixelated rendering.
 
-Replay scenarios are served by an allowlisted read-only endpoint. `office_full.json` combines actual offline mocked research/repair/cache executions and actual Demo Generator/Converter/Explainer executions; it does not fabricate agent activity. The HUD labels replay usage as recorded. `scripts/record_office_events.py` regenerates it without real provider calls. Unit tests cover A*/event reduction; Playwright replays all eleven event destinations, inspector and mini mode at desktop/tablet widths. Screenshots live under `docs/screenshots/`. Inspiration: [agent-office](https://github.com/harishkotra/agent-office) (zones, camera, emotes, activity log ideas); no source code or assets copied. Budget barriers reflect waiting events; interactive approval/retry is completed in Phase 7.
+Replay scenarios are served by an allowlisted read-only endpoint. `office_full.json` combines actual offline mocked research/repair/cache executions and actual Demo Generator/Converter/Explainer executions; it does not fabricate agent activity. The HUD labels replay usage as recorded. `scripts/record_office_events.py` regenerates it without real provider calls. Unit tests cover A*/event reduction; Playwright replays all eleven event destinations, inspector and mini mode at desktop/tablet widths. Screenshots live under `docs/screenshots/`. Inspiration: [agent-office](https://github.com/harishkotra/agent-office) (zones, camera, emotes, activity log ideas); no source code or assets copied. Budget barriers reflect waiting events; **Review budget** opens the same persisted job review used by Builder and tools.
+
+
+## Budget review and recovery (Phase 7)
+
+When a call would exceed a limit, no provider request is sent. Review the proposed total call/token/character limits and usage already consumed. **Approve & retry job** applies those limits only to that job; global settings and other jobs keep their original limits. **Decline & stop** ends the job without a provider call. Research, converter fallback and Explain support the same flow. Open waiting jobs from history after reload or restart, or select **Review budget** in the live Office. Recorded replay never requests approval or makes provider calls.
+
+A retry restarts the operation with caches and preserves cumulative reservations, including failed calls. Earlier cached LLM results are reused; research may fetch documentation again. Another blocked call requires another explicit approval. Codex usage remains unknown (`null`) and is labelled as quota usage. Changing providers requires a new job to keep token/quota accounting consistent. A transient research `api_key` is excluded from retry payloads; save a host-bound target credential in the UI before retrying authenticated verification.
+
+`POST /api/jobs/{id}/budget` takes `approve` and optional total `max_llm_calls`, `max_input_tokens`, `max_output_tokens`, `max_prompt_chars`. Approval must cover the next reserved call plus consumed usage. Limits are bounded and validated; an atomic SQLite claim prevents duplicate approval or concurrent approval/denial. Requests and decisions survive an application restart. This recovers jobs paused by Cost Guard; automatic recovery of jobs interrupted while running is not implemented.
+
+The final gate is available as `make gate` or `.\scripts\gate.ps1`. It runs tests/lint, builds a fresh no-key Compose instance, checks onboarding and secret masking, runs browser tests, removes its own data volume, and audits tracked content. Install Playwright Chromium first with `pnpm --dir frontend exec playwright install chromium`. An existing Chromium can be selected with `PW_CHROMIUM_EXECUTABLE_PATH`; test data and artifacts stay under ignored `data/`. Never use a personal app instance or data volume for the gate.

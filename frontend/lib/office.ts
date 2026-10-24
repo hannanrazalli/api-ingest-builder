@@ -33,7 +33,7 @@ export function applyEvent(world:World,event:Event,reduced=false):World{
   if(reduced){character.position=destination;character.path=[];visited=Array.from(new Set([...visited,event.agent]));}
  }
  const last=world.log.at(-1);const duplicate=last&&last.agent===event.agent&&last.state===event.state&&last.task===event.task;
- const result={...world,characters:{...world.characters,[event.agent]:character},visited,log:duplicate?world.log:[...world.log.slice(-249),event],blocked:event.state==="waiting"||world.blocked,saved:!!event.cache_hit||world.saved};
+ const result={...world,characters:{...world.characters,[event.agent]:character},visited,log:duplicate?world.log:[...world.log.slice(-249),event],blocked:event.agent==="orchestrator"&&["working","success","error"].includes(event.state)?false:event.state==="waiting"||world.blocked,saved:!!event.cache_hit||world.saved};
  if(event.llm){result.tokens=event.llm.input_tokens===null||world.tokens===null?null:world.tokens+event.llm.input_tokens;result.cost=event.llm.cost_usd===null||world.cost===null?null:world.cost+event.llm.cost_usd;}
  return result;
 }

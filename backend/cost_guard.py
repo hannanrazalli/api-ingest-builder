@@ -11,7 +11,9 @@ class CostGuard:
     """Reserve before I/O; failed requests retain reservations (fail closed)."""
 
     def __init__(self, settings: Settings, job: Job):
-        self.settings = settings
+        self.settings = (
+            settings.model_copy(update=job.budget_limits) if job.budget_limits else settings
+        )
         self.job = job
         self.lock = Lock()
 
@@ -24,6 +26,12 @@ class CostGuard:
                 or self.job.input_tokens + input_tokens > self.settings.max_input_tokens
                 or self.job.output_tokens + output_tokens > self.settings.max_output_tokens
             ):
+                self.job.budget_ready = False
+                self.job.budget_required = {
+                    "max_llm_calls": self.job.calls + 1,
+                    "max_input_tokens": self.job.input_tokens + input_tokens,
+                    "max_output_tokens": self.job.output_tokens + output_tokens,
+                }
                 self.job.status = "waiting"
                 raise BudgetExceeded("LLM budget exceeded; explicit user override required")
             self.job.calls += 1
@@ -38,6 +46,11 @@ class CostGuard:
                 self.job.calls + 1 > self.settings.max_llm_calls
                 or self.job.prompt_chars + prompt_chars > self.settings.max_prompt_chars
             ):
+                self.job.budget_ready = False
+                self.job.budget_required = {
+                    "max_llm_calls": self.job.calls + 1,
+                    "max_prompt_chars": self.job.prompt_chars + prompt_chars,
+                }
                 self.job.status = "waiting"
                 raise BudgetExceeded(
                     "Codex call/character budget exceeded; explicit override required"

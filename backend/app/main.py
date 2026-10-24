@@ -60,7 +60,7 @@ def create_app(db_path=None, static_dir=None):
 
     @app.get("/api/health")
     def health():
-        return {"status": "ok", "phase": 1}
+        return {"status": "ok", "phase": 7}
 
     @app.get("/api/providers/codex/status")
     async def codex_status():
@@ -102,7 +102,7 @@ def create_app(db_path=None, static_dir=None):
                 job_id=job.id,
                 agent="orchestrator",
                 state="idle",
-                task="Foundation ready; research pipeline arrives in Phase 2",
+                task="Workspace ready; start research, conversion or explanation",
             )
         )
         return job
@@ -174,12 +174,17 @@ def create_app(db_path=None, static_dir=None):
 
     @app.post("/api/convert")
     async def convert(request: ConvertRequest):
+        job = Job(id=str(uuid4()))
         try:
-            return await Converter().run(store, request)
+            return await Converter().run(store, request, job=job)
         except BudgetExceeded:
-            raise HTTPException(
-                409, "Cost Guard blocked this job; approve a budget override"
-            ) from None
+            return JSONResponse(
+                {
+                    "detail": "Cost Guard blocked this job; review its budget",
+                    "job": store.job(job.id).model_dump(mode="json"),
+                },
+                status_code=409,
+            )
         except ProviderError as exc:
             raise HTTPException(422, str(exc)) from None
         except Exception:
@@ -189,12 +194,17 @@ def create_app(db_path=None, static_dir=None):
 
     @app.post("/api/explain")
     async def explain(request: ExplainRequest):
+        job = Job(id=str(uuid4()))
         try:
-            return await Explainer().run(store, request)
+            return await Explainer().run(store, request, job=job)
         except BudgetExceeded:
-            raise HTTPException(
-                409, "Cost Guard blocked this job; approve a budget override"
-            ) from None
+            return JSONResponse(
+                {
+                    "detail": "Cost Guard blocked this job; review its budget",
+                    "job": store.job(job.id).model_dump(mode="json"),
+                },
+                status_code=409,
+            )
         except (ValueError, ProviderError) as exc:
             raise HTTPException(422, str(exc)) from None
         except Exception:
@@ -232,6 +242,82 @@ def create_app(db_path=None, static_dir=None):
             baseline = json.loads((path.parent / "coingecko_cache_miss.json").read_text())
             saved = sum(item["llm"]["input_tokens"] or 0 for item in baseline if item["llm"])
         return {"events": events, "saved_tokens": saved}
+
+    class BudgetDecision(Model):
+        approve: bool
+        max_llm_calls: int = Field(default=3, ge=0, le=100)
+        max_input_tokens: int = Field(default=20000, ge=0, le=2000000)
+        max_output_tokens: int = Field(default=4000, ge=0, le=200000)
+        max_prompt_chars: int = Field(default=80000, ge=0, le=8000000)
+
+    @app.post("/api/jobs/{job_id}/budget")
+    async def decide_budget(job_id: str, decision: BudgetDecision):
+        job = store.job(job_id)
+        if not job:
+            raise HTTPException(404, "Job not found")
+        pending = store.pending(job_id)
+        if job.status != "waiting" or not job.budget_ready or not pending:
+            raise HTTPException(409, "This job is not awaiting budget approval")
+        if decision.approve and pending["provider"] != effective_settings(store).provider:
+            raise HTTPException(409, "Provider changed; start a new job with the selected provider")
+        limits = decision.model_dump(exclude={"approve"})
+        if decision.approve and any(limits.get(k, 0) < v for k, v in job.budget_required.items()):
+            raise HTTPException(422, "Limits must cover the next call and usage already consumed")
+        job = store.claim_waiting(job_id, limits if decision.approve else None)
+        if job is None:
+            raise HTTPException(409, "This budget decision was already handled")
+        bus = EventBus(store)
+        bus.emit(
+            Event(
+                job_id=job_id,
+                agent="orchestrator",
+                state="working" if decision.approve else "error",
+                task="Job-only budget approved; retrying with cache"
+                if decision.approve
+                else "Budget increase declined; job stopped",
+            )
+        )
+        operation = pending["operation"]
+        if not decision.approve:
+            result = store.result(job_id)
+            if result:
+                result.update(job=job.model_dump(mode="json"), status="error")
+                store.save_result(job_id, result)
+            return {"operation": operation, "job": job, "declined": True}
+        try:
+            if operation == "research":
+                result = await app.state.research_factory().run(
+                    ResearchRequest.model_validate(pending["request"]), job
+                )
+                result = result.model_dump(mode="json")
+            elif operation == "convert":
+                result = await Converter().run(
+                    store, ConvertRequest.model_validate(pending["request"]), job=job
+                )
+            else:
+                result = await Explainer().run(
+                    store, ExplainRequest.model_validate(pending["request"]), job=job
+                )
+            return {"operation": operation, "result": result, "job": store.job(job_id)}
+        except BudgetExceeded:
+            return JSONResponse(
+                {
+                    "detail": "The retry needs another budget review",
+                    "job": store.job(job_id).model_dump(mode="json"),
+                },
+                status_code=409,
+            )
+        except Exception:
+            job = store.job(job_id)
+            job.status = "error"
+            store.save_job(job)
+            return JSONResponse(
+                {
+                    "detail": "Retry failed; check provider settings and job events",
+                    "job": job.model_dump(mode="json"),
+                },
+                status_code=422,
+            )
 
     @app.get("/api/jobs/{job_id}/event-log")
     def event_log(job_id: str):

@@ -1,4 +1,4 @@
-.PHONY: dev test lint build
+.PHONY: dev test lint build gate
 
 dev:
 	uv sync --frozen
@@ -21,3 +21,6 @@ lint:
 
 build:
 	docker compose --env-file .env.example build
+
+gate:
+	uv run --no-env-file python scripts/phase_gate.py
