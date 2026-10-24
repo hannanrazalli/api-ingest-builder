@@ -17,3 +17,6 @@
 @media(max-width:1250px){.office-layout{grid-template-columns:1fr}.office-sidebar{display:grid;grid-template-columns:1fr 1.5fr}.activity-log{border-top:0;border-left:1px solid var(--border)}.activity-log ol{max-height:240px}.office-workspace{padding:28px 24px}}@media(max-width:740px){.office-workspace{padding:22px 14px}.office-sidebar{display:block}.activity-log{border-left:0;border-top:1px solid var(--border)}.agent-roster{grid-template-columns:repeat(2,1fr)}.office-controls label{margin:0}.office-hud{gap:8px}.office-hud>span:last-child{margin:0}.office-pip{right:10px;max-width:calc(100vw - 20px)}}
 
 .office-workspace{width:100%;flex-shrink:0}
+
+.budget-review{margin:20px 24px;padding:20px;flex-shrink:0;max-width:900px;align-self:center;width:calc(100% - 48px)}.budget-review p{margin:10px 0;color:var(--muted);font-size:12px}.budget-review .form-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.budget-review .tool-controls{padding:16px 0 0;flex-wrap:wrap}.budget-review input{min-width:0}@media(max-width:600px){.budget-review{margin:14px;width:calc(100% - 28px)}.budget-review .form-grid{grid-template-columns:1fr}}
+.workspace{flex-direction:column}.view{flex:1}

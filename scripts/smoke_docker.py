@@ -1,8 +1,9 @@
 """Exercise a disposable production container without loading dotenv or using real keys."""
+import os
 import subprocess
 from uuid import uuid4
 
-name = "aib-foundation-smoke-" + uuid4().hex[:10]
+name = "aib-smoke-" + uuid4().hex[:10]
 
 
 def docker(*args):
@@ -33,7 +34,7 @@ def api(path, method="GET", data=None):
         headers={"Content-Type": "application/json"})
     return json.load(urllib.request.urlopen(request, timeout=3))
 
-assert api("/api/health")["phase"] == 1
+assert api("/api/health")["phase"] == 7
 assert "API Ingest Builder" in urllib.request.urlopen(base).read().decode()
 assert api("/api/settings")["demo_mode"]
 assert not api("/api/settings")["onboarded"]
@@ -57,7 +58,7 @@ print("PASS: HTTP, static export, onboarding, key masking, Demo, SSE, non-root, 
 """
 
 try:
-    docker("run", "-d", "--name", name, "-v", "/app/data", "api-ingest-builder-app")
+    docker("run", "-d", "--name", name, "-v", "/app/data", os.getenv("SMOKE_IMAGE", "api-ingest-builder-app"))
     print(docker("exec", name, "python", "-c", check).strip())
     docker("restart", name)
     persistence = check[:check.index('assert api("/api/health")')] + r"""

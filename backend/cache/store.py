@@ -30,6 +30,9 @@ class Store:
             db.execute(
                 "CREATE TABLE IF NOT EXISTS research_index (key TEXT PRIMARY KEY, value TEXT)"
             )
+            db.execute(
+                "CREATE TABLE IF NOT EXISTS pending_requests (job_id TEXT PRIMARY KEY, value TEXT)"
+            )
             db.execute("CREATE TABLE IF NOT EXISTS results (job_id TEXT PRIMARY KEY, value TEXT)")
             db.execute(
                 "CREATE TABLE IF NOT EXISTS api_credentials (host TEXT PRIMARY KEY, value TEXT)"
@@ -124,3 +127,40 @@ class Store:
                 db.execute("INSERT OR REPLACE INTO api_credentials VALUES (?, ?)", (host, key))
             row = db.execute("SELECT value FROM api_credentials WHERE host=?", (host,)).fetchone()
         return row[0] if row else None
+
+    def save_pending(self, job_id, operation, request):
+        # Never retain a transient target API key in a retry payload.
+        from backend.settings import effective_settings
+
+        value = {
+            "provider": effective_settings(self).provider,
+            "operation": operation,
+            "request": request.model_dump(mode="json", exclude={"api_key"}),
+        }
+        with self.connect() as db:
+            db.execute(
+                "INSERT OR REPLACE INTO pending_requests VALUES (?, ?)", (job_id, json.dumps(value))
+            )
+
+    def pending(self, job_id):
+        with self.connect() as db:
+            row = db.execute(
+                "SELECT value FROM pending_requests WHERE job_id=?", (job_id,)
+            ).fetchone()
+        return json.loads(row[0]) if row else None
+
+    def claim_waiting(self, job_id, limits=None):
+        """One approval/denial wins, including across server processes."""
+        with self.connect() as db:
+            db.execute("BEGIN IMMEDIATE")
+            row = db.execute("SELECT value FROM jobs WHERE id=?", (job_id,)).fetchone()
+            job = Job.model_validate_json(row[0]) if row else None
+            if not job or job.status != "waiting" or not job.budget_ready:
+                return None
+            job.budget_ready = False
+            job.status = "running" if limits is not None else "error"
+            if limits is not None:
+                job.budget_limits = limits
+                job.budget_required = {}
+            db.execute("UPDATE jobs SET value=? WHERE id=?", (job.model_dump_json(), job_id))
+            return job

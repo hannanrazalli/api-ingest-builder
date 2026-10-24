@@ -33,6 +33,7 @@ class ResearchPipeline:
         job = job or Job(id=str(uuid4()))
         job.status = "running"
         self.store.save_job(job)
+        self.store.save_pending(job.id, "research", request)
         key = request.api_key.get_secret_value() if request.api_key else None
         register_secrets(settings.api_key.get_secret_value(), key)
         bus = EventBus(self.store, [settings.api_key.get_secret_value(), key])
@@ -229,7 +230,7 @@ class ResearchPipeline:
                 "Research failed safely. Check the "
                 "documentation URL, connectivity and provider settings"
             )
-        self.store.save_job(job)
+        job.budget_ready = job.status == "waiting"
         result = ResearchResult(
             job=job,
             status=status,
@@ -241,4 +242,5 @@ class ResearchPipeline:
             demo=demo,
         )
         self.store.save_result(job.id, result.model_dump(mode="json"))
+        self.store.save_job(job)
         return result

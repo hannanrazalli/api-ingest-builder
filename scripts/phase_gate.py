@@ -2,6 +2,7 @@
 import json
 import os
 import re
+import shutil
 import subprocess
 import sys
 import time
@@ -57,7 +58,7 @@ def audit():
 
 def gate():
     for script in ("test", "lint"):
-        output = command(["powershell.exe", "-NoProfile", "-ExecutionPolicy", "Bypass", "-File", f"scripts/{script}.ps1"])
+        output = command(["powershell.exe", "-NoProfile", "-ExecutionPolicy", "Bypass", "-File", f"scripts/{script}.ps1"] if os.name == "nt" else ["make", script])
         counts = [line.strip() for line in output.splitlines() if " passed" in line or "All checks passed" in line or "already formatted" in line]
         print(f"{script}: PASS; " + "; ".join(counts) + "; TypeScript 0 errors", flush=True)
     project = "aib-gate-" + uuid4().hex[:8]
@@ -90,7 +91,7 @@ def gate():
         if (ROOT / "frontend/playwright.config.ts").exists():
             ui_env = env.copy()
             ui_env["PW_BASE_URL"] = "http://localhost:8000"
-            output = command(["pnpm.cmd", "--dir", "frontend", "exec", "playwright", "test"], ui_env)
+            output = command([shutil.which("pnpm.cmd" if os.name == "nt" else "pnpm") or "pnpm", "--dir", "frontend", "exec", "playwright", "test"], ui_env)
             print("Playwright: PASS; " + " ".join(line.strip() for line in output.splitlines() if "passed" in line), flush=True)
         print("Compose: PASS; healthy, health/UI 200, Demo/onboarding, key masking and logs", flush=True)
     finally:

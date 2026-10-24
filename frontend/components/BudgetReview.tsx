@@ -1,0 +1,13 @@
+"use client";
+import {useEffect, useState} from "react";
+import {api, ApiError, post, type Job, type Settings} from "../lib/api";
+import {Button} from "./ui/button";
+type Limits={max_llm_calls:number;max_input_tokens:number;max_output_tokens:number;max_prompt_chars:number};
+export type BudgetResult={operation:string;job:Job;result?:unknown;declined?:boolean;error?:string};
+const labels:Record<keyof Limits,string>={max_llm_calls:"Total LLM calls",max_input_tokens:"Total input tokens",max_output_tokens:"Total output tokens",max_prompt_chars:"Total prompt characters"};
+export function BudgetReview({job,onDone}:{job:Job;onDone:(value:BudgetResult)=>void}){
+ const [limits,setLimits]=useState<Limits|null>(null),[busy,setBusy]=useState(false),[error,setError]=useState("");
+ useEffect(()=>{let ignore=false;setLimits(null);api<Settings>("/api/settings").then(settings=>{if(ignore)return;const values={} as Limits;for(const key of Object.keys(labels) as (keyof Limits)[]) values[key]=Math.max(settings[key],job.budget_limits?.[key]??0,job.budget_required?.[key]??0);setLimits(values);}).catch(()=>{if(!ignore)setError("Could not load budget limits. Reload to try again.");});return()=>{ignore=true;};},[job]);
+ async function decide(approve:boolean){setBusy(true);setError("");try{onDone(await post<BudgetResult>(`/api/jobs/${job.id}/budget`,{approve,...limits}));}catch(e){if(e instanceof ApiError&&e.job)onDone({operation:"",job:e.job,error:e.message});setError((e as Error).message);}finally{setBusy(false);}}
+ return <section id="budget-review" className="notice budget-review" aria-label="Job budget review"><h3>Review this job’s budget</h3><p>Used: {job.calls} calls · {job.input_tokens??"unknown"} input tokens · {job.output_tokens??"unknown"} output tokens · {job.prompt_chars} prompt characters.</p><p>Approval retries this job using cached work. Limits include usage already consumed and apply only to this job. A provider call may incur charges or use Codex quota.</p>{limits&&<div className="form-grid">{(Object.keys(labels) as (keyof Limits)[]).map(key=><label key={key}>{labels[key]}<input type="number" min={job.budget_required?.[key]??0} max={key==="max_llm_calls"?100:key==="max_output_tokens"?200000:key==="max_prompt_chars"?8000000:2000000} step="1" value={limits[key]} onChange={e=>setLimits({...limits,[key]:Number(e.target.value)})}/></label>)}</div>}<div className="tool-controls"><Button disabled={busy||!limits} onClick={()=>void decide(true)}>{busy?"Working...":"Approve & retry job"}</Button><Button variant="secondary" disabled={busy} onClick={()=>void decide(false)}>Decline & stop</Button></div>{error&&<p role="alert">{error}</p>}</section>;
+}

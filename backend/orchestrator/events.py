@@ -30,7 +30,7 @@ class EventBus:
                 after = sequence
                 yield f"id: {sequence}\nevent: agent\ndata: {event.model_dump_json()}\n\n"
             job = self.store.job(job_id)
-            if job and job.status in {"success", "error"}:
+            if job and (job.status in {"success", "error"} or job.budget_ready):
                 yield "event: done\ndata: {}\n\n"
                 return
             yield ": heartbeat\n\n"

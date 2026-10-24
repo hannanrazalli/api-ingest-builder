@@ -20,7 +20,8 @@ WORKDIR /app
 COPY --from=python-build /opt/venv /opt/venv
 COPY backend ./backend
 COPY --from=frontend /ui/out ./frontend/out
-RUN useradd --create-home app && mkdir /app/data && chown app:app /app/data
+RUN useradd --create-home app && mkdir /app/data && chown app:app /app/data \
+    && chmod -R a+rX /app/backend /app/frontend
 USER app
 EXPOSE 8000
 HEALTHCHECK --interval=30s --start-period=10s CMD python -c "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/api/health', timeout=3)"
