@@ -88,6 +88,7 @@ class Generator:
         if options.endpoint >= len(spec.endpoints):
             raise ValueError("Select an existing endpoint")
         endpoint = spec.endpoints[options.endpoint]
+        dates = endpoint.date_params
         if endpoint.method != "GET" or spec.auth.type == "unsupported":
             raise ValueError("Generation supports GET with no auth, API key or bearer only")
         validate_url(str(spec.base_url))
@@ -95,11 +96,13 @@ class Generator:
             c in endpoint.path for c in ("\\", "?", "#", "\r", "\n")
         ):
             raise ValueError("Unsafe endpoint path")
-        if options.end_date < options.start_date:
+        if options.mode == "backfill" and not dates:
+            raise ValueError("Backfill requires documented date parameters")
+        if options.mode == "backfill" and options.start_date is None:
+            raise ValueError("Choose a start date for backfill")
+        if options.start_date and options.end_date and options.end_date < options.start_date:
             raise ValueError("End date must be on or after start date")
-        flatten = options.flatten or (
-            options.mode == "ndjson" and profile is not None and profile.nested
-        )
+        flatten = options.flatten
         if flatten and (profile is None or not profile.nested):
             raise ValueError("Flattening is offered only for a profiled nested response")
         if (
@@ -119,22 +122,45 @@ class Generator:
             raise ValueError("Supply API credentials through environment variables only")
         path = endpoint.path
         snippet_dates = {}
-        dates = endpoint.date_params
         if dates:
-            for name, value in [(dates.start, options.start_date), (dates.end, options.end_date)]:
-                if name:
-                    dt = datetime.combine(value, datetime.min.time(), tzinfo=UTC)
-                    if name == dates.end and dates.format in {"unix", "unix_ms"}:
-                        dt += timedelta(days=1) - timedelta(seconds=1)
-                    snippet_dates[name] = (
-                        int(dt.timestamp()) * (1000 if dates.format == "unix_ms" else 1)
-                        if dates.format in {"unix", "unix_ms"}
-                        else dt.strftime(dates.strftime or "%Y-%m-%d")
-                    )
+            if options.mode == "backfill" and options.start_date:
+                for name, value in [
+                    (dates.start, options.start_date),
+                    (dates.end, options.end_date or options.start_date),
+                ]:
+                    if name:
+                        dt = datetime.combine(value, datetime.min.time(), tzinfo=UTC)
+                        if name == dates.end and dates.format in {"unix", "unix_ms"}:
+                            dt += timedelta(days=1) - timedelta(seconds=1)
+                        snippet_dates[name] = (
+                            int(dt.timestamp()) * (1000 if dates.format == "unix_ms" else 1)
+                            if dates.format in {"unix", "unix_ms"}
+                            else dt.strftime(dates.strftime or "%Y-%m-%d")
+                        )
         for param in endpoint.params:
             if param.name in secret_names:
                 continue
-            value = options.params.get(param.name, snippet_dates.get(param.name, param.default))
+            value = options.params.get(param.name)
+            if param.name in snippet_dates and options.mode in {
+                "backfill",
+                "daily",
+                "full_ingestion",
+            }:
+                value = snippet_dates[param.name]
+            elif value is None and param.required:
+                value = param.default
+            if value is None and param.required and dates and param.name in {
+                dates.start,
+                dates.end,
+            }:
+                today = datetime.combine(datetime.now(UTC).date(), datetime.min.time(), tzinfo=UTC)
+                if param.name == dates.end and dates.format in {"unix", "unix_ms"}:
+                    today += timedelta(days=1) - timedelta(seconds=1)
+                value = (
+                    int(today.timestamp()) * (1000 if dates.format == "unix_ms" else 1)
+                    if dates.format in {"unix", "unix_ms"}
+                    else today.strftime(dates.strftime or "%Y-%m-%d")
+                )
             if value is None and param.required:
                 raise ValueError(f"Supply required parameter: {param.name}")
             if value is None:
@@ -155,20 +181,45 @@ class Generator:
         if "{" in path or "}" in path:
             raise ValueError("Fill every required path parameter")
         chunk_days = min(options.chunk_days, endpoint.max_range_days or options.chunk_days)
-        if options.mode == "chunking" and not endpoint.date_params:
-            raise ValueError("Chunking requires documented date parameters")
+        if options.full_ingestion and options.mode in {"daily", "full_ingestion"}:
+            if not options.bucket_name:
+                raise ValueError("Enter an S3 bucket name for full S3 ingestion")
+            if not options.table_name:
+                raise ValueError("Enter a table name for full S3 ingestion")
+        if options.mode == "full_ingestion" and not options.bucket_name:
+            raise ValueError("Enter an S3 bucket name for full S3 ingestion")
+        if options.mode == "full_ingestion" and not options.table_name:
+            raise ValueError("Enter a table name for full S3 ingestion")
+        if options.mode == "full_ingestion" and options.run_target == "airflow":
+            raise ValueError("Use Daily with Airflow to generate a scheduled S3 task")
         env = Environment(
             loader=FileSystemLoader(TEMPLATES),
             undefined=StrictUndefined,
             keep_trailing_newline=True,
         )
         env.filters["py"] = lambda value: pprint.pformat(value, width=70, sort_dicts=True)
-        code = env.get_template(options.mode + ".py.j2").render(
+        mode_template = options.mode
+        if options.mode == "full_ingestion":
+            mode_template = "full_ingestion_local"
+        if options.mode == "backfill":
+            if options.run_target != "local":
+                raise ValueError("Backfill is generated for local Python only")
+            mode_template = "backfill_s3" if options.full_ingestion else "backfill"
+        if options.mode == "daily":
+            mode_template = "daily_s3" if options.full_ingestion else "daily"
+        if options.mode == "daily" and options.run_target == "airflow":
+            mode_template = "daily_airflow_s3" if options.full_ingestion else "daily_airflow"
+        code = env.get_template(mode_template + ".py.j2").render(
             spec=spec,
             endpoint=endpoint,
             options=options,
             flatten=flatten,
             full=options.full_ingestion or options.mode == "full_ingestion",
+            output_format=options.output_format,
+            run_target=options.run_target,
+            bucket_name=options.bucket_name,
+            main_folder=options.main_folder,
+            table_name=options.table_name or spec.name,
             base_url=str(spec.base_url).rstrip("/"),
             source_url=str(endpoint.source_url),
             url=str(spec.base_url).rstrip("/") + path,

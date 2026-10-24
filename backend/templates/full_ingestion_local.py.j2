@@ -1,0 +1,48 @@
+{% include 'common.py.j2' %}
+
+import boto3
+import json
+from datetime import datetime, UTC
+
+date = datetime.now(UTC).date()
+{% if endpoint.date_params %}params[{{ endpoint.date_params.start|py }}] = api_date(date.isoformat())
+{% if endpoint.date_params.end %}params[{{ endpoint.date_params.end|py }}] = api_date(date.isoformat(), end=True)
+{% endif %}{% endif %}response = requests.get(url, headers=headers, params=params, timeout=30, allow_redirects=False)
+if 300 <= response.status_code < 400:
+    raise RuntimeError("Redirect refused to protect API credentials")
+response.raise_for_status()
+data = response.json()
+bucket = {{ options.bucket_name|py }}
+table = {{ table_name|py }}
+folder = {{ main_folder|py }}
+key = f"{folder}/{table}/year={date:%Y}/month={date:%m}/day={date:%d}/{table}_{date:%Y%m%d}.{{ output_format }}"
+s3 = boto3.client("s3")
+{% if output_format == 'ndjson' %}records = data
+{% for part in (record_path or '').split('.') if part %}records = records[{{ part|py }}]
+{% endfor %}
+if isinstance(records, dict):
+    records = [records]
+if not isinstance(records, list):
+    raise ValueError("Glue crawler output must resolve to a JSON record list")
+{% if flatten %}def flatten_record(value, prefix=""):
+    if isinstance(value, dict):
+        return {
+            child_key: child_value
+            for key, item in value.items()
+            for child_key, child_value in flatten_record(
+                item, f"{prefix}.{key}" if prefix else str(key)
+            ).items()
+        }
+    if isinstance(value, list):
+        return {
+            child_key: child_value
+            for index, item in enumerate(value)
+            for child_key, child_value in flatten_record(
+                item, f"{prefix}.{index}" if prefix else str(index)
+            ).items()
+        }
+    return {prefix or "value": value}
+records = [flatten_record(row) for row in records]
+{% endif %}body = "\n".join(json.dumps(row) for row in records)
+{% else %}body = json.dumps(data)
+{% endif %}s3.put_object(Bucket=bucket, Key=key, Body=body, ContentType="application/x-ndjson" if {{ (output_format == 'ndjson')|py }} else "application/json")

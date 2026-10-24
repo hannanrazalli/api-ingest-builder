@@ -1,4 +1,20 @@
 {% include 'common.py.j2' %}
 
-if __name__ == "__main__":
-    backfill({{ options.start_date.isoformat()|py }}, {{ options.end_date.isoformat()|py }})
+from datetime import date, timedelta
+import json
+from pathlib import Path
+
+start = date.fromisoformat({{ options.start_date.isoformat()|py }})
+end = date.fromisoformat({{ (options.end_date or options.start_date).isoformat()|py }})
+data = []
+while start <= end:
+    params = {{ params|py }}
+    params[{{ endpoint.date_params.start|py }}] = api_date(start.isoformat())
+    {% if endpoint.date_params.end %}params[{{ endpoint.date_params.end|py }}] = api_date(start.isoformat(), end=True)
+    {% endif %}response = requests.get(url, headers=headers, params=params, timeout=30, allow_redirects=False)
+    if 300 <= response.status_code < 400:
+        raise RuntimeError("Redirect refused to protect API credentials")
+    response.raise_for_status()
+    data.extend(response.json() if isinstance(response.json(), list) else [response.json()])
+    start += timedelta(days=1)
+Path("{{ spec.name }}.json").write_text(json.dumps(data, indent=2), encoding="utf-8")

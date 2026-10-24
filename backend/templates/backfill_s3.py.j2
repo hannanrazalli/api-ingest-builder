@@ -1,0 +1,25 @@
+{% include 'common.py.j2' %}
+
+import boto3
+import json
+from datetime import datetime, UTC
+
+start_date = {{ options.start_date.isoformat()|py }}
+end_date = {{ (options.end_date or options.start_date).isoformat()|py }}
+{% if endpoint.date_params %}params[{{ endpoint.date_params.start|py }}] = start_date
+{% if endpoint.date_params.end %}params[{{ endpoint.date_params.end|py }}] = end_date
+{% endif %}{% endif %}response = requests.get(url, headers=headers, params=params, timeout=30, allow_redirects=False)
+if 300 <= response.status_code < 400:
+    raise RuntimeError("Redirect refused to protect API credentials")
+response.raise_for_status()
+data = response.json()
+bucket = {{ options.bucket_name|py }}
+table = {{ table_name|py }}
+folder = {{ main_folder|py }}
+date = datetime.strptime(start_date, "%Y-%m-%d").replace(tzinfo=UTC)
+key = f"{folder}/{table}/year={date:%Y}/month={date:%m}/day={date:%d}/{table}_{date:%Y%m%d}.{{ output_format }}"
+s3 = boto3.client("s3")
+{% if output_format == 'ndjson' %}records = data if isinstance(data, list) else [data]
+body = "\n".join(json.dumps(row) for row in records)
+{% else %}body = json.dumps(data)
+{% endif %}s3.put_object(Bucket=bucket, Key=key, Body=body, ContentType="application/x-ndjson" if {{ (output_format == 'ndjson')|py }} else "application/json")

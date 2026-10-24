@@ -9,11 +9,12 @@ test("thin Builder works end to end in Demo without external requests",async({pa
  await page.setViewportSize({width:1440,height:1000});
  await page.goto("/");
  const demo=page.getByRole("button",{name:"Use Demo mode",exact:true});if(await demo.isVisible())await demo.click();
- await page.getByRole("button",{name:"Frankfurter",exact:true}).click();
+ await page.getByRole("button",{name:"Research API",exact:true}).click();
  await expect(page.getByRole("heading",{name:"frankfurter",exact:true})).toBeVisible();
  await expect(page.getByRole("button",{name:"Download Python"})).toBeEnabled();
  await expect(page.locator(".monaco-editor")).toBeVisible();
  await page.getByRole("button",{name:"Backfill",exact:true}).click();
+ await page.getByLabel("Start date").fill("2024-01-01");
  await page.waitForResponse(r=>r.url().endsWith("/api/generate")&&r.request().postDataJSON()?.mode==="backfill"&&r.status()===200);
  const download=page.waitForEvent("download");await page.getByRole("button",{name:"Download Python"}).click();expect((await download).suggestedFilename()).toBe("frankfurter.py");
  await page.screenshot({animations:"disabled",path:path.join(shots,"builder-desktop.png"),fullPage:true});
@@ -26,7 +27,8 @@ test("thin Builder works end to end in Demo without external requests",async({pa
 for(const width of [1440,820])test(`main views and onboarding at ${width}px`,async({page})=>{
  await page.setViewportSize({width,height:1100});await page.goto("/");
  const demo=page.getByRole("button",{name:"Use Demo mode",exact:true});if(await demo.isVisible())await demo.click();
- await page.getByRole("button",{name:"CoinGecko",exact:true}).click();
+ await page.getByLabel("Website or documentation URL").fill("https://www.coingecko.com");
+ await page.getByRole("button",{name:"Research API",exact:true}).click();
  await expect(page.getByRole("heading",{name:"coingecko",exact:true})).toBeVisible();
  await expect(page.getByRole("button",{name:"Download Python"})).toBeEnabled();
  await expect(page.locator(".monaco-editor")).toBeVisible();

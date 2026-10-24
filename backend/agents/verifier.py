@@ -1,6 +1,6 @@
 import json
 import re
-from datetime import UTC, datetime, timedelta
+from datetime import UTC, datetime
 from urllib.parse import quote, urlsplit
 
 import httpx
@@ -31,17 +31,18 @@ class Verifier:
                 if key and key_host != urlsplit(str(spec.base_url)).hostname:
                     raise UnsafeURL("API key host does not match the documented API base URL")
                 params, headers, path = {}, dict(spec.default_headers), endpoint.path
-                day = datetime.now(UTC) - timedelta(days=1)
+                day = datetime.now(UTC)
                 date_values = {}
                 if endpoint.date_params:
                     dates = endpoint.date_params
-                    for name in (dates.start, dates.end):
-                        if name:
-                            date_values[name] = (
-                                int(day.timestamp()) * (1000 if dates.format == "unix_ms" else 1)
-                                if dates.format in {"unix", "unix_ms"}
-                                else day.strftime(dates.strftime or "%Y-%m-%d")
-                            )
+                    name = dates.start
+                    date_values[name] = (
+                        int(day.timestamp()) * (1000 if dates.format == "unix_ms" else 1)
+                        if dates.format in {"unix", "unix_ms"}
+                        else day.strftime(dates.strftime or "%Y-%m-%d")
+                    )
+                    if dates.end:
+                        date_values[dates.end] = date_values[name]
                 for param in endpoint.params:
                     value = date_values.get(param.name, param.default)
                     if value is None and param.required:

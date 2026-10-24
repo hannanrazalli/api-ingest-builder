@@ -1,4 +1,10 @@
 {% include 'common.py.j2' %}
 
-if __name__ == "__main__":
-    {{ spec.name }}()
+date = datetime.now(UTC).strftime("%Y-%m-%d")
+{% if endpoint.date_params %}params[{{ endpoint.date_params.start|py }}] = api_date(date)
+{% if endpoint.date_params.end %}params[{{ endpoint.date_params.end|py }}] = api_date(date, end=True)
+{% endif %}{% endif %}response = requests.get(url, headers=headers, params=params, timeout=30, allow_redirects=False)
+if 300 <= response.status_code < 400:
+    raise RuntimeError("Redirect refused to protect API credentials")
+response.raise_for_status()
+data = response.json()

@@ -85,6 +85,8 @@ def dates(parameters):
         if "unix" in start.description.lower()
         else "iso"
     )
+    if not end:
+        return DateParams(start=start.name, end=None, format=fmt)
     return DateParams(start=start.name, end=end.name if end else None, format=fmt)
 
 

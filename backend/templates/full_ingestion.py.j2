@@ -1,4 +1,25 @@
-{% include 'common.py.j2' %}
+{% if run_target == 'airflow' %}from airflow.decorators import task
+from airflow.providers.amazon.aws.hooks.s3 import S3Hook
+{% endif %}{% include 'common.py.j2' %}
 
-if __name__ == "__main__":
-    backfill({{ options.start_date.isoformat()|py }}, {{ options.end_date.isoformat()|py }})
+import json
+import boto3
+from datetime import datetime, UTC
+
+date = datetime.now(UTC).date()
+{% if endpoint.date_params %}params[{{ endpoint.date_params.start|py }}] = date.isoformat()
+{% if endpoint.date_params.end %}params[{{ endpoint.date_params.end|py }}] = date.isoformat()
+{% endif %}{% endif %}response = requests.get(url, headers=headers, params=params, timeout=30, allow_redirects=False)
+if 300 <= response.status_code < 400:
+    raise RuntimeError("Redirect refused to protect API credentials")
+response.raise_for_status()
+data = response.json()
+bucket = {{ options.bucket_name|py }}
+table = {{ table_name|py }}
+folder = {{ main_folder|py }}
+key = f"{folder}/{table}/year={date:%Y}/month={date:%m}/day={date:%d}/{table}_{date:%Y%m%d}.{{ output_format }}"
+s3 = boto3.client("s3")
+{% if output_format == 'ndjson' %}records = data if isinstance(data, list) else [data]
+body = "\n".join(json.dumps(row) for row in records)
+{% else %}body = json.dumps(data)
+{% endif %}s3.put_object(Bucket=bucket, Key=key, Body=body, ContentType="application/x-ndjson" if {{ (output_format == 'ndjson')|py }} else "application/json")

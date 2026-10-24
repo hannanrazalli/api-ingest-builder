@@ -1,0 +1,51 @@
+from airflow.decorators import task
+{% if full %}from airflow.providers.amazon.aws.hooks.s3 import S3Hook{% endif %}
+from datetime import datetime, UTC, timedelta
+import json
+import requests
+
+{% if endpoint.date_params %}def api_date(value, end=False):
+    dt = datetime.strptime(value, "%Y-%m-%d").replace(tzinfo=UTC)
+    if {{ endpoint.date_params.format|py }} in {"unix", "unix_ms"}:
+        if end:
+            dt += timedelta(days=1) - timedelta(seconds=1)
+        return int(dt.timestamp()) * (1000 if {{ (endpoint.date_params.format == 'unix_ms')|py }} else 1)
+    return dt.strftime({{ (endpoint.date_params.strftime or '%Y-%m-%d')|py }})
+{% endif %}
+@task
+def {{ spec.name }}(ds=None):
+    date = ds or datetime.now(UTC).strftime("%Y-%m-%d")
+    url = {{ url|py }}
+    params = {{ params|py }}
+    headers = {{ headers|py }}
+{% if spec.auth.required %}    import os
+    api_key = os.getenv({{ spec.auth.env_var|py }})
+    if not api_key:
+        raise RuntimeError({{ ('Set ' + spec.auth.env_var + ' in your environment')|py }})
+{% if spec.auth.type == 'header' %}    headers[{{ spec.auth.header_name|py }}] = api_key
+{% elif spec.auth.type == 'query' %}    params[{{ spec.auth.query_name|py }}] = api_key
+{% elif spec.auth.type == 'bearer' %}    headers["Authorization"] = "Bearer " + api_key
+{% endif %}{% endif %}
+{% if endpoint.date_params %}    params[{{ endpoint.date_params.start|py }}] = api_date(date)
+{% if endpoint.date_params.end %}    params[{{ endpoint.date_params.end|py }}] = api_date(date, end=True)
+{% endif %}{% endif %}    response = requests.get(url, headers=headers, params=params, timeout=30, allow_redirects=False)
+    if 300 <= response.status_code < 400:
+        raise RuntimeError("Redirect refused to protect API credentials")
+    response.raise_for_status()
+    data = response.json()
+{% if full %}    hook = S3Hook(aws_conn_id="aws_default")
+    bucket = {{ options.bucket_name|py }}
+    table = {{ table_name|py }}
+    folder = {{ main_folder|py }}
+    dt = datetime.strptime(date, "%Y-%m-%d").replace(tzinfo=UTC)
+    key = f"{folder}/{table}/year={dt:%Y}/month={dt:%m}/day={dt:%d}/{table}_{dt:%Y%m%d}.{{ output_format }}"
+{% if output_format == 'ndjson' %}    records = data
+{% for part in (record_path or '').split('.') if part %}    records = records[{{ part|py }}]
+{% endfor %}    if isinstance(records, dict):
+        records = [records]
+    if not isinstance(records, list):
+        raise ValueError("Glue crawler output must resolve to a JSON record list")
+    body = "\n".join(json.dumps(row) for row in records)
+{% else %}    body = json.dumps(data)
+{% endif %}    hook.load_string(string_data=body, key=key, bucket_name=bucket, replace=True)
+{% endif %}    return data
